@@ -1,0 +1,2733 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Guía Completa del Proyecto — AGS para el Problema de la Dieta (ITO)</title>
+    <style>
+      :root {
+        --bg-canvas: #1a1b1f;
+        --glass-grad: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.12) 0%,
+          rgba(255, 255, 255, 0.04) 100%
+        );
+        --glass-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 1px 2px rgba(0, 0, 0, 0.2),
+          0 8px 24px rgba(0, 0, 0, 0.25);
+        --border: rgba(255, 255, 255, 0.1);
+        --border-soft: rgba(255, 255, 255, 0.08);
+        --text: #ffffff;
+        --text-muted: rgba(255, 255, 255, 0.74);
+        --text-subtle: rgba(255, 255, 255, 0.55);
+        --accent: #4f8cff;
+        --accent-soft: rgba(79, 140, 255, 0.22);
+        --emerald: #34d399;
+        --rose: #fb7185;
+        --amber: #f5b85a;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        --sans: 'Plus Jakarta Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: var(--sans);
+        color: var(--text);
+        background-color: var(--bg-canvas);
+        background-image:
+          radial-gradient(circle at 18% 8%, rgba(245, 198, 138, 0.16), transparent 42%),
+          radial-gradient(circle at 86% 88%, rgba(79, 140, 255, 0.2), transparent 46%),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+        background-attachment: fixed;
+        line-height: 1.65;
+      }
+
+      .page-shell {
+        width: 100%;
+        max-width: none;
+        min-height: 100vh;
+        margin: 0;
+        padding: 28px 36px;
+        border-radius: 0;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.035) 0%,
+          rgba(255, 255, 255, 0.015) 100%
+        );
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        display: grid;
+        grid-template-columns: 280px minmax(0, 1fr);
+        gap: 28px;
+      }
+
+      /* Navegación lateral */
+      .toc {
+        position: sticky;
+        top: 28px;
+        align-self: start;
+        background: var(--glass-grad);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        box-shadow: var(--glass-shadow);
+        padding: 20px;
+      }
+
+      .toc-title {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--text-subtle);
+        margin: 0 0 12px;
+        font-weight: 700;
+      }
+
+      .toc a {
+        display: block;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 13px;
+        padding: 7px 12px;
+        border-radius: 999px;
+        margin-bottom: 4px;
+        transition:
+          background 0.15s ease,
+          color 0.15s ease;
+      }
+
+      .toc a:hover,
+      .toc a.active {
+        background: var(--accent-soft);
+        color: #ffffff;
+      }
+
+      .toc-footer {
+        margin-top: 16px;
+        padding-top: 14px;
+        border-top: 1px solid var(--border-soft);
+        font-size: 11px;
+        color: var(--text-subtle);
+      }
+
+      .btn-print {
+        width: 100%;
+        margin-top: 10px;
+        padding: 9px 14px;
+        border-radius: 999px;
+        border: 1px solid rgba(79, 140, 255, 0.55);
+        background: var(--accent);
+        color: #fff;
+        font-weight: 600;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      .btn-print:hover {
+        filter: brightness(1.08);
+      }
+
+      /* Contenido principal */
+      main {
+        min-width: 0;
+      }
+
+      .hero {
+        background: linear-gradient(155deg, rgba(79, 140, 255, 0.18), rgba(255, 255, 255, 0.05));
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        box-shadow: var(--glass-shadow);
+        padding: 28px 32px;
+        margin-bottom: 24px;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        background: var(--accent-soft);
+        border: 1px solid rgba(79, 140, 255, 0.5);
+        color: #b7d2ff;
+      }
+
+      h1 {
+        margin: 12px 0 8px;
+        font-size: 30px;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+      }
+
+      .hero p {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 15px;
+      }
+
+      .kpi-row {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .kpi {
+        background: rgba(0, 0, 0, 0.22);
+        border: 1px solid var(--border-soft);
+        border-radius: 18px;
+        padding: 14px 16px;
+      }
+
+      .kpi-label {
+        font-size: 11px;
+        color: var(--text-subtle);
+      }
+
+      .kpi-val {
+        font-size: 20px;
+        font-weight: 700;
+        margin-top: 2px;
+      }
+
+      section.card {
+        background: var(--glass-grad);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        padding: 26px 28px;
+        margin-bottom: 20px;
+        box-shadow: var(--glass-shadow);
+      }
+
+      h2 {
+        margin: 0 0 12px;
+        font-size: 21px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      h2 .sec-num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: var(--accent-soft);
+        border: 1px solid rgba(79, 140, 255, 0.5);
+        color: #b7d2ff;
+        font-size: 13px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+
+      h3 {
+        margin: 20px 0 8px;
+        font-size: 15px;
+        color: #b7d2ff;
+      }
+
+      p,
+      li {
+        color: var(--text-muted);
+        font-size: 14px;
+      }
+
+      strong {
+        color: #ffffff;
+      }
+
+      code {
+        font-family: var(--mono);
+        font-size: 12.5px;
+        background: rgba(255, 255, 255, 0.11);
+        padding: 2px 6px;
+        border-radius: 6px;
+        color: #dbeafe;
+      }
+
+      pre {
+        margin: 12px 0;
+        padding: 16px;
+        border-radius: 16px;
+        background: rgba(0, 0, 0, 0.38);
+        border: 1px solid var(--border-soft);
+        overflow-x: auto;
+        font-family: var(--mono);
+        font-size: 12.5px;
+        line-height: 1.55;
+        color: #e5e7eb;
+      }
+
+      .formula-box {
+        background: rgba(0, 0, 0, 0.28);
+        border: 1px solid rgba(79, 140, 255, 0.35);
+        border-left: 4px solid var(--accent);
+        border-radius: 16px;
+        padding: 16px 20px;
+        margin: 14px 0;
+      }
+
+      .formula-math {
+        font-family: 'Cambria Math', 'Times New Roman', Georgia, serif;
+        font-size: 19px;
+        color: #ffffff;
+        text-align: center;
+        margin: 8px 0;
+        letter-spacing: 0.02em;
+      }
+
+      .formula-caption {
+        font-size: 12.5px;
+        color: var(--text-subtle);
+        margin-top: 6px;
+      }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .tag-pill {
+        display: inline-block;
+        padding: 2px 9px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+        background: rgba(79, 140, 255, 0.18);
+        color: #b7d2ff;
+        margin-bottom: 6px;
+      }
+
+      .tag-pill.emerald {
+        background: rgba(52, 211, 153, 0.16);
+        color: #6ee7b7;
+      }
+
+      .tag-pill.amber {
+        background: rgba(245, 184, 90, 0.18);
+        color: #fcd34d;
+      }
+
+      .tag-pill.rose {
+        background: rgba(251, 113, 133, 0.18);
+        color: #fda4af;
+      }
+
+      .phase-grid {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      .phase-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-soft);
+        border-top: 3px solid var(--accent);
+        border-radius: 18px;
+        padding: 15px;
+      }
+
+      .phase-card h4 {
+        margin: 4px 0 6px;
+        font-size: 13.5px;
+        color: #ffffff;
+      }
+
+      .phase-card p {
+        margin: 0;
+        font-size: 12.5px;
+      }
+
+      .svg-diagram {
+        width: 100%;
+        height: auto;
+        display: block;
+        margin: 16px 0;
+        background: rgba(0, 0, 0, 0.25);
+        border: 1px solid var(--border-soft);
+        border-radius: 18px;
+        padding: 14px;
+      }
+
+      .quiz-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border-soft);
+        border-radius: 18px;
+        padding: 16px 18px;
+        margin-bottom: 12px;
+      }
+
+      .quiz-q {
+        font-weight: 600;
+        color: #ffffff;
+        margin: 0 0 10px;
+        font-size: 14px;
+      }
+
+      .quiz-options {
+        display: grid;
+        gap: 8px;
+      }
+
+      .quiz-opt {
+        text-align: left;
+        padding: 10px 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--text-muted);
+        font-size: 13px;
+        cursor: pointer;
+        transition:
+          background 0.15s ease,
+          border-color 0.15s ease;
+      }
+
+      .quiz-opt:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.12);
+        color: #ffffff;
+      }
+
+      .quiz-opt.correct {
+        background: rgba(52, 211, 153, 0.18);
+        border-color: rgba(52, 211, 153, 0.65);
+        color: #d1fae5;
+      }
+
+      .quiz-opt.wrong {
+        background: rgba(251, 113, 133, 0.18);
+        border-color: rgba(251, 113, 133, 0.65);
+        color: #ffe4e6;
+      }
+
+      .quiz-feedback {
+        margin-top: 10px;
+        font-size: 12.5px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        display: none;
+      }
+
+      .quiz-feedback.show {
+        display: block;
+      }
+
+      .quiz-feedback.ok {
+        background: rgba(52, 211, 153, 0.12);
+        border: 1px solid rgba(52, 211, 153, 0.35);
+        color: #d1fae5;
+      }
+
+      .quiz-feedback.err {
+        background: rgba(251, 113, 133, 0.12);
+        border: 1px solid rgba(251, 113, 133, 0.35);
+        color: #ffe4e6;
+      }
+
+      .quiz-summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 14px;
+        padding: 14px 18px;
+        border-radius: 16px;
+        background: rgba(79, 140, 255, 0.14);
+        border: 1px solid rgba(79, 140, 255, 0.35);
+        font-size: 13.5px;
+      }
+
+      .mini-box {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-soft);
+        border-radius: 18px;
+        padding: 16px;
+      }
+
+      .mini-box h4 {
+        margin: 0 0 6px;
+        font-size: 14px;
+        color: #ffffff;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 14px 0;
+        font-size: 13px;
+      }
+
+      th,
+      td {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--border-soft);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-subtle);
+      }
+
+      td {
+        color: var(--text-muted);
+      }
+
+      .step-list {
+        list-style: none;
+        padding: 0;
+        margin: 14px 0;
+        display: grid;
+        gap: 10px;
+      }
+
+      .step-item {
+        display: grid;
+        grid-template-columns: 36px minmax(0, 1fr);
+        gap: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-soft);
+        border-radius: 16px;
+        padding: 14px 16px;
+      }
+
+      .step-badge {
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        background: var(--accent);
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 12px rgba(79, 140, 255, 0.5);
+      }
+
+      .arch-flow {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 10px;
+        margin: 16px 0;
+      }
+
+      .arch-node {
+        background: rgba(0, 0, 0, 0.28);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px 12px;
+        text-align: center;
+      }
+
+      .arch-node strong {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 4px;
+      }
+
+      .arch-node span {
+        font-size: 11.5px;
+        color: var(--text-subtle);
+      }
+
+      .arch-node.highlight {
+        border-color: rgba(79, 140, 255, 0.7);
+        background: rgba(79, 140, 255, 0.16);
+      }
+
+      .callout {
+        background: rgba(52, 211, 153, 0.12);
+        border: 1px solid rgba(52, 211, 153, 0.35);
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin: 14px 0;
+        font-size: 13.5px;
+        color: #d1fae5;
+      }
+
+      details {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--border-soft);
+        border-radius: 16px;
+        padding: 12px 16px;
+        margin-bottom: 10px;
+      }
+
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: #ffffff;
+        font-size: 14px;
+      }
+
+      details p {
+        margin: 10px 0 0;
+      }
+
+      @media (max-width: 980px) {
+        .page-shell {
+          grid-template-columns: 1fr;
+          margin: 0;
+          border-radius: 0;
+        }
+        .toc {
+          position: static;
+        }
+        .kpi-row,
+        .grid-2,
+        .grid-3,
+        .phase-grid,
+        .arch-flow {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .kpi-row,
+        .grid-2,
+        .grid-3,
+        .phase-grid,
+        .arch-flow {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media print {
+        body {
+          background: #ffffff !important;
+          color: #111827 !important;
+        }
+        .page-shell {
+          display: block;
+          box-shadow: none;
+          border: none;
+          background: #ffffff;
+          margin: 0;
+          padding: 0;
+        }
+        .toc {
+          display: none;
+        }
+        section.card,
+        .hero,
+        .mini-box,
+        .formula-box,
+        .step-item,
+        details {
+          background: #ffffff !important;
+          color: #111827 !important;
+          border: 1px solid #d1d5db !important;
+          break-inside: avoid;
+        }
+        p,
+        li,
+        td,
+        th,
+        strong,
+        h1,
+        h2,
+        h3,
+        summary,
+        .formula-math {
+          color: #111827 !important;
+        }
+        code,
+        pre {
+          background: #f3f4f6 !important;
+          color: #111827 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <aside class="toc" aria-label="Tabla de contenido">
+        <p class="toc-title">Contenido de la Guía</p>
+        <a href="#desde-cero">0. Empieza aquí (desde cero)</a>
+        <a href="#fundamentos-ia">1. Fundamentos de IA y AGS</a>
+        <a href="#introduccion">2. El Problema de la Dieta</a>
+        <a href="#modelo-matematico">3. Fórmulas y modelo matemático</a>
+        <a href="#proceso-ags">4. Proceso del AGS paso a paso</a>
+        <a href="#guia-parametros">4B. Guía de los 11 parámetros</a>
+        <a href="#ejemplo-trazado">5. Ejemplo trazado a mano</a>
+        <a href="#interpretacion-graficas">6. Leer gráficas, Pc y Pm</a>
+        <a href="#desarrollo-fases">7. Desarrollo del proyecto (5 fases)</a>
+        <a href="#arquitectura">8. Arquitectura MVC y Patrones</a>
+        <a href="#viaje-clic">8B. Viaje de un clic en el código</a>
+        <a href="#estructura-codigo">9. Estructura completa del código</a>
+        <a href="#guia-uso">10. Cómo usar la aplicación</a>
+        <a href="#trazabilidad">11. Trazabilidad y pruebas</a>
+        <a href="#defensa-oral">12. Guion y preguntas de defensa</a>
+        <a href="#autoevaluacion">13. Autoevaluación interactiva</a>
+        <div class="toc-footer">
+          Instituto Tecnológico de Oaxaca<br />
+          Inteligencia Artificial · 2026
+          <button class="btn-print" onclick="window.print()">Imprimir / Guardar PDF</button>
+        </div>
+      </aside>
+
+      <main>
+        <header class="hero">
+          <span class="badge">Documentación Técnica y Guía de Exposición</span>
+          <h1>Algoritmo Genético Simple (AGS) para el Problema de la Dieta</h1>
+          <p>
+            Explicación completa del modelado matemático como
+            <strong>mochila 0-1 multidimensional</strong>, arquitectura MVC con 4 patrones de
+            diseño, ejecución paralela en Web Worker, estructura del código fuente y guía de uso
+            paso a paso.
+          </p>
+          <div class="kpi-row">
+            <div class="kpi">
+              <div class="kpi-label">Espacio de búsqueda (N = 30)</div>
+              <div class="kpi-val">1,073,741,824</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Evaluaciones por defecto</div>
+              <div class="kpi-val">50 × 100 = 5,000</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Restricciones duras</div>
+              <div class="kpi-val">≤ 2,000 kcal · ≤ $150</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Cobertura unitaria</div>
+              <div class="kpi-val">97.7 % (71 tests)</div>
+            </div>
+          </div>
+        </header>
+
+        <!-- 0. EMPIEZA AQUÍ: EXPLICACIÓN DESDE CERO -->
+        <section class="card" id="desde-cero">
+          <h2>
+            <span class="sec-num">0</span> Empieza Aquí: Entiende Todo Desde Cero (Sin Conocimientos
+            Previos)
+          </h2>
+          <p>
+            Si nunca habías escuchado sobre <em>Algoritmos Genéticos</em> ni
+            <em>Optimización Combinatoria</em>, esta sección te explica la idea completa en lenguaje
+            cotidiano antes de entrar a las fórmulas.
+          </p>
+
+          <h3>0.1 El reto de la vida real</h3>
+          <p>
+            Imagina que vas al supermercado con una lista de <strong>30 alimentos</strong> (pollo,
+            atún, huevo, frijoles, lentejas, arroz, plátano, brócoli, queso panela, etc.). Tienes
+            una meta y dos reglas estrictas para tu comida de todo el día:
+          </p>
+          <ul>
+            <li>
+              <strong>Meta (Maximizar):</strong> conseguir la mayor cantidad de
+              <strong>proteína</strong> posible (en gramos).
+            </li>
+            <li>
+              <strong>Regla 1 (Restricción):</strong> no pasarte de
+              <strong>2,000 calorías</strong> en total.
+            </li>
+            <li>
+              <strong>Regla 2 (Restricción):</strong> no gastar más de
+              <strong>$150 pesos mexicanos</strong>.
+            </li>
+            <li>
+              <strong>Regla de porción (0-1):</strong> cada alimento solo puedes llevarlo
+              <strong>una vez</strong> (<code>1</code> = sí) o <strong>dejarlo</strong> (<code
+                >0</code
+              >
+              = no).
+            </li>
+          </ul>
+
+          <h3>0.2 ¿Por qué la computadora no simplemente prueba TODAS las combinaciones?</h3>
+          <p>
+            Por cada alimento tienes 2 decisiones (Sí o No). Si tienes <code>N</code> alimentos, el
+            número total de menús distintos es <strong>2<sup>N</sup></strong
+            >. Eso se llama <strong>explosión combinatoria</strong>:
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Alimentos (N)</th>
+                <th>Combinaciones posibles (2<sup>N</sup>)</th>
+                <th>¿Se puede probar una por una (fuerza bruta)?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>5 alimentos</strong></td>
+                <td><code>32</code> dietas</td>
+                <td>Sí, en menos de 0.01 milisegundos.</td>
+              </tr>
+              <tr>
+                <td><strong>10 alimentos</strong></td>
+                <td><code>1,024</code> dietas</td>
+                <td>Sí, casi instantáneo.</td>
+              </tr>
+              <tr>
+                <td><strong>20 alimentos</strong></td>
+                <td><code>1,048,576</code> dietas (1 millón)</td>
+                <td>Ya empieza a tardar segundos.</td>
+              </tr>
+              <tr>
+                <td><strong>30 alimentos (nuestra app)</strong></td>
+                <td><code>1,073,741,824</code> dietas (más de mil millones)</td>
+                <td>Impráctico en un navegador interactivo; congelaría la compu.</td>
+              </tr>
+              <tr>
+                <td><strong>50 alimentos</strong></td>
+                <td><code>1,125,899,906,842,624</code> (1.1 cuatrillones)</td>
+                <td>Imposible: tomaría siglos incluso en computadoras muy potentes.</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>0.3 ¿Cómo se compara el AGS con otros enfoques para resolver esto?</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Enfoque</th>
+                <th>¿Cómo piensa?</th>
+                <th>Ventaja</th>
+                <th>Desventaja principal</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Fuerza bruta (Exacto)</strong></td>
+                <td>
+                  Prueba todas las <code>2<sup>N</sup></code> dietas.
+                </td>
+                <td>Garantiza el 100 % óptimo global.</td>
+                <td>Explota exponencialmente; inutilizable si <code>N</code> crece.</td>
+              </tr>
+              <tr>
+                <td><strong>Algoritmo voraz (Greedy)</strong></td>
+                <td>Agarra primero los alimentos con más proteína.</td>
+                <td>Muy rápido.</td>
+                <td>Se queda sin presupuesto rápido con carne/pescado caros y deja huecos.</td>
+              </tr>
+              <tr>
+                <td><strong>Selección humana</strong></td>
+                <td>Intuición y prueba-error manual.</td>
+                <td>Considera gusto personal.</td>
+                <td>Tarda decenas de segundos/minutos y suele quedar muy debajo del óptimo.</td>
+              </tr>
+              <tr>
+                <td><strong>Búsqueda aleatoria pura</strong></td>
+                <td>Lanza 5,000 dados al azar y guarda la mejor dieta.</td>
+                <td>Simple, sin reglas.</td>
+                <td>No aprende de sus aciertos; cada intento empieza desde cero.</td>
+              </tr>
+              <tr>
+                <td><strong>Algoritmo Genético (AGS)</strong></td>
+                <td>
+                  Crea 50 dietas, conserva los rasgos de las mejores, las <em>cruza</em> y aplica
+                  pequeñas <em>mutaciones</em> durante 100 generaciones.
+                </td>
+                <td>
+                  Aprende qué combinaciones funcionan (<strong>bloques constructores</strong>) y
+                  encuentra dietas sobresalientes en <strong>~5 milisegundos</strong>.
+                </td>
+                <td>
+                  Es una <em>metaheurística</em>: encuentra soluciones excelentes/casi óptimas, pero
+                  no garantiza matemáticamente el óptimo absoluto en el 100 % de los casos.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>0.4 La idea secreta de por qué SÍ funciona: «Bloques constructores»</h3>
+          <p>
+            ¿Por qué cruzar dos dietas produce una dieta mejor? Según el
+            <strong>Teorema de Esquemas de John Holland</strong>, cuando un menú logra buena
+            proteína suele contener pequeños <em>«bloques ganadores»</em> (por ejemplo, el Padre A
+            descubrió que incluir <em>Pollo + Soya</em> aporta 49 g por solo $31.5 MXN; el Padre B
+            descubrió que incluir <em>Atún + Lentejas + Huevo</em> aporta 53.8 g por $40.5 MXN). Al
+            <strong>cruzar</strong> al Padre A con el Padre B, sus hijos heredan
+            <strong>ambos bloques a la vez</strong>, saltando a más de 100 g de proteína sin tener
+            que descubrirlos desde cero.
+          </p>
+
+          <h3>0.5 Diagrama completo del ciclo evolutivo de nuestro programa</h3>
+          <svg
+            class="svg-diagram"
+            viewBox="0 0 920 270"
+            xmlns="http://www.w3.org/2000/svg"
+            role="img"
+            aria-label="Diagrama de flujo del Algoritmo Genético Simple"
+          >
+            <defs>
+              <marker
+                id="arrowBlue"
+                viewBox="0 0 10 10"
+                refX="8"
+                refY="5"
+                markerWidth="6"
+                markerHeight="6"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#4F8CFF" />
+              </marker>
+              <marker
+                id="arrowGreen"
+                viewBox="0 0 10 10"
+                refX="8"
+                refY="5"
+                markerWidth="6"
+                markerHeight="6"
+                orient="auto-start-reverse"
+              >
+                <path d="M 0 1 L 10 5 L 0 9 z" fill="#34D399" />
+              </marker>
+            </defs>
+
+            <!-- Fila superior -->
+            <rect
+              x="16"
+              y="24"
+              width="165"
+              height="68"
+              rx="14"
+              fill="rgba(79,140,255,0.18)"
+              stroke="#4F8CFF"
+              stroke-width="1.5"
+            />
+            <text
+              x="98"
+              y="50"
+              text-anchor="middle"
+              fill="#ffffff"
+              font-size="12.5"
+              font-weight="700"
+            >
+              1. Población inicial
+            </text>
+            <text x="98" y="69" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="11">
+              50 dietas (p_inicial = 0.2)
+            </text>
+
+            <line
+              x1="181"
+              y1="58"
+              x2="220"
+              y2="58"
+              stroke="#4F8CFF"
+              stroke-width="2"
+              marker-end="url(#arrowBlue)"
+            />
+
+            <rect
+              x="224"
+              y="24"
+              width="185"
+              height="68"
+              rx="14"
+              fill="rgba(255,255,255,0.08)"
+              stroke="rgba(255,255,255,0.28)"
+              stroke-width="1.5"
+            />
+            <text
+              x="316"
+              y="50"
+              text-anchor="middle"
+              fill="#ffffff"
+              font-size="12.5"
+              font-weight="700"
+            >
+              2. Evaluar + Penalizar
+            </text>
+            <text x="316" y="69" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="11">
+              Factible: P(x) · No: 0.001·P(x)
+            </text>
+
+            <line
+              x1="409"
+              y1="58"
+              x2="448"
+              y2="58"
+              stroke="#4F8CFF"
+              stroke-width="2"
+              marker-end="url(#arrowBlue)"
+            />
+
+            <rect
+              x="452"
+              y="24"
+              width="190"
+              height="68"
+              rx="14"
+              fill="rgba(245,184,90,0.16)"
+              stroke="#F5B85A"
+              stroke-width="1.5"
+            />
+            <text
+              x="547"
+              y="48"
+              text-anchor="middle"
+              fill="#ffffff"
+              font-size="12.5"
+              font-weight="700"
+            >
+              3. ¿Condición de paro?
+            </text>
+            <text x="547" y="68" text-anchor="middle" fill="rgba(255,255,255,0.75)" font-size="11">
+              G = 100 o 25% estancado
+            </text>
+
+            <!-- Rama SÍ -->
+            <line
+              x1="642"
+              y1="58"
+              x2="700"
+              y2="58"
+              stroke="#34D399"
+              stroke-width="2"
+              marker-end="url(#arrowGreen)"
+            />
+            <text
+              x="668"
+              y="49"
+              text-anchor="middle"
+              fill="#6EE7B7"
+              font-size="11"
+              font-weight="700"
+            >
+              SÍ
+            </text>
+
+            <rect
+              x="704"
+              y="20"
+              width="200"
+              height="76"
+              rx="14"
+              fill="rgba(52,211,153,0.18)"
+              stroke="#34D399"
+              stroke-width="1.5"
+            />
+            <text
+              x="804"
+              y="46"
+              text-anchor="middle"
+              fill="#ffffff"
+              font-size="12.5"
+              font-weight="700"
+            >
+              Resultado Final
+            </text>
+            <text x="804" y="64" text-anchor="middle" fill="#D1FAE5" font-size="11">
+              Mejor dieta factible global
+            </text>
+            <text x="804" y="81" text-anchor="middle" fill="#D1FAE5" font-size="10.5">
+              + Comparativa vs. Aleatorio
+            </text>
+
+            <!-- Rama NO hacia abajo -->
+            <line
+              x1="547"
+              y1="92"
+              x2="547"
+              y2="150"
+              stroke="#4F8CFF"
+              stroke-width="2"
+              marker-end="url(#arrowBlue)"
+            />
+            <text x="564" y="126" fill="#9BC0FF" font-size="11" font-weight="700">NO</text>
+
+            <!-- Fila inferior (operadores) -->
+            <rect
+              x="462"
+              y="154"
+              width="170"
+              height="68"
+              rx="14"
+              fill="rgba(255,255,255,0.08)"
+              stroke="rgba(255,255,255,0.28)"
+              stroke-width="1.5"
+            />
+            <text
+              x="547"
+              y="180"
+              text-anchor="middle"
+              fill="#ffffff"
+              font-size="12.5"
+              font-weight="700"
+            >
+              4. Selección Torneo
+            </text>
+            <text x="547" y="199" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="11">
+              k = 3 · (+ Elitismo e)
+            </text>
+
+            <line
+              x1="462"
+              y1="188"
+              x2="418"
+              y2="188"
+              stroke="#4F8CFF"
+              stroke-width="2"
+              marker-end="url(#arrowBlue)"
+            />
+
+            <rect
+              x="242"
+              y="154"
+              width="172"
+              height="68"
+              rx="14"
+              fill="rgba(255,255,255,0.08)"
+              stroke="rgba(255,255,255,0.28)"
+              stroke-width="1.5"
+            />
+            <text
+              x="328"
+              y="180"
+              text-anchor="middle"
+              fill="#ffffff"
+              font-size="12.5"
+              font-weight="700"
+            >
+              5. Cruce 1 Punto
+            </text>
+            <text x="328" y="199" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="11">
+              Pc = 0.80 · q ∈ [1, N-1]
+            </text>
+
+            <line
+              x1="242"
+              y1="188"
+              x2="198"
+              y2="188"
+              stroke="#4F8CFF"
+              stroke-width="2"
+              marker-end="url(#arrowBlue)"
+            />
+
+            <rect
+              x="22"
+              y="154"
+              width="172"
+              height="68"
+              rx="14"
+              fill="rgba(255,255,255,0.08)"
+              stroke="rgba(255,255,255,0.28)"
+              stroke-width="1.5"
+            />
+            <text
+              x="108"
+              y="180"
+              text-anchor="middle"
+              fill="#ffffff"
+              font-size="12.5"
+              font-weight="700"
+            >
+              6. Mutación Bit-Flip
+            </text>
+            <text x="108" y="199" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="11">
+              Pm = 1/N ≈ 3.33% / gen
+            </text>
+
+            <!-- Bucle de regreso a Evaluar -->
+            <path
+              d="M 108 154 L 108 122 L 316 122 L 316 96"
+              fill="none"
+              stroke="#4F8CFF"
+              stroke-width="2"
+              stroke-dasharray="5 4"
+              marker-end="url(#arrowBlue)"
+            />
+            <text
+              x="212"
+              y="116"
+              text-anchor="middle"
+              fill="#9BC0FF"
+              font-size="11"
+              font-weight="600"
+            >
+              Nueva generación (g = g + 1)
+            </text>
+          </svg>
+        </section>
+
+        <!-- 1. FUNDAMENTOS DE IA Y COMPUTACIÓN EVOLUTIVA -->
+        <section class="card" id="fundamentos-ia">
+          <h2>
+            <span class="sec-num">1</span> Fundamentos de Inteligencia Artificial: ¿Qué es un
+            Algoritmo Genético?
+          </h2>
+          <p>
+            El tema central de este proyecto pertenece a la rama de la
+            <strong>Computación Evolutiva</strong> dentro de la Inteligencia Artificial. Un
+            <strong>Algoritmo Genético Simple (AGS)</strong>, introducido formalmente por
+            <em>John Holland</em> en 1975, es una <strong>metaheurística de optimización</strong>
+            inspirada en la teoría de la evolución de Charles Darwin:
+            <em
+              >«sobreviven y se reproducen con mayor probabilidad los individuos mejor adaptados a
+              su entorno»</em
+            >.
+          </p>
+          <p>
+            En lugar de evaluar una sola solución a la vez o probar ciegamente todas las opciones
+            posibles, un AGS mantiene una <strong>población de soluciones candidatas</strong> que
+            compiten, se combinan entre sí y sufren pequeñas mutaciones durante decenas o cientos de
+            <strong>generaciones</strong> hasta descubrir soluciones de altísima calidad en una
+            fracción de segundo.
+          </p>
+
+          <h3>1.1 Analogía Biología ↔ Computación aplicada a nuestro proyecto</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Concepto biológico</th>
+                <th>Equivalente en el AGS</th>
+                <th>Qué es exactamente en esta app</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Organismo / Individuo</strong></td>
+                <td>Una solución candidata al problema</td>
+                <td>Un menú diario completo (instancia de <code>Individuo</code>)</td>
+              </tr>
+              <tr>
+                <td><strong>Cromosoma (Genotipo)</strong></td>
+                <td>Vector de longitud fija <code>N</code> que codifica la solución</td>
+                <td>Arreglo binario de 30 bits, ej. <code>[1, 0, 1, 1, 0, ...]</code></td>
+              </tr>
+              <tr>
+                <td><strong>Gen</strong></td>
+                <td>Cada posición <code>i</code> dentro del cromosoma</td>
+                <td>
+                  Un alimento específico del catálogo (ej. <code>x<sub>1</sub></code> = Pollo)
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Alelo</strong></td>
+                <td>Valor que toma un gen</td>
+                <td><code>1</code> = incluir la porción en la dieta; <code>0</code> = excluirla</td>
+              </tr>
+              <tr>
+                <td><strong>Fenotipo</strong></td>
+                <td>Interpretación real del cromosoma en el dominio</td>
+                <td>Lista de alimentos elegidos + totales de proteína, calorías y costo</td>
+              </tr>
+              <tr>
+                <td><strong>Aptitud (Fitness)</strong></td>
+                <td>Calificación numérica de qué tan buena es la solución</td>
+                <td>
+                  Gramos de proteína si es factible, o <code>proteína × 0.001</code> si excede
+                  límites
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Población</strong></td>
+                <td>Conjunto de <code>P</code> soluciones que coexisten</td>
+                <td>50 dietas distintas compitiendo simultáneamente por defecto</td>
+              </tr>
+              <tr>
+                <td><strong>Selección natural</strong></td>
+                <td>Mecanismo que elige progenitores según su aptitud</td>
+                <td>Torneo de tamaño <code>k = 3</code> (gana el mejor de 3 al azar)</td>
+              </tr>
+              <tr>
+                <td><strong>Reproducción (Cruce)</strong></td>
+                <td>Combinación de material genético de dos padres</td>
+                <td>
+                  Cruce de un punto (<code>Pc = 0.80</code>) intercambiando colas del cromosoma
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Mutación</strong></td>
+                <td>Alteración aleatoria ocasional de un gen</td>
+                <td>
+                  Bit-flip independiente por gen con probabilidad <code>Pm = 1/N ≈ 3.33 %</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <h3>1.2 El equilibrio clave de la IA: Exploración vs. Explotación</h3>
+          <div class="grid-2">
+            <div class="mini-box">
+              <span class="tag-pill">Explotación (Refinar lo bueno)</span>
+              <h4>Selección por torneo + Cruce + Elitismo</h4>
+              <p>
+                Aprovecha los mejores alimentos ya descubiertos y combina dietas buenas para armar
+                menús aún mejores. <strong>Riesgo si es excesiva:</strong> todos los individuos se
+                vuelven clones demasiado rápido (diversidad → 0) y el algoritmo queda atrapado en un
+                <strong>óptimo local</strong> (<em>convergencia prematura</em>).
+              </p>
+            </div>
+            <div class="mini-box">
+              <span class="tag-pill amber">Exploración (Descubrir zonas nuevas)</span>
+              <h4>Población diversa + Mutación bit-flip</h4>
+              <p>
+                Introduce alimentos nuevos que nadie en la población tenía activos, permitiendo
+                saltar fuera de óptimos locales hacia mejores combinaciones.
+                <strong>Riesgo si es excesiva:</strong> si <code>Pm</code> es muy grande (ej. 0.20),
+                se destruyen constantemente las dietas buenas y el AGS degenera en una búsqueda
+                aleatoria sin memoria.
+              </p>
+            </div>
+          </div>
+
+          <h3>1.3 Glosario esencial para entender cada término del proyecto</h3>
+          <div class="grid-3">
+            <div class="mini-box">
+              <span class="tag-pill">Espacio de búsqueda</span>
+              <p>
+                Conjunto de absolutamente todas las dietas posibles (<code>2<sup>N</sup></code
+                >). Con 30 alimentos hay más de <strong>mil millones</strong> de combinaciones; el
+                AGS explora inteligentemente solo 5,000 (~0.0005 % del espacio) y aun así halla
+                menús cercanos al óptimo.
+              </p>
+            </div>
+            <div class="mini-box">
+              <span class="tag-pill emerald">Factible vs. Infactible</span>
+              <p>
+                Una dieta es <strong>factible</strong> cuando cumple <em>todas</em> las
+                restricciones duras (≤ 2,000 kcal y ≤ $150 MXN). Si viola aunque sea por 1 kcal o
+                $0.50 MXN, es <strong>infactible</strong> y recibe penalización estática.
+              </p>
+            </div>
+            <div class="mini-box">
+              <span class="tag-pill">Óptimo local vs. global</span>
+              <p>
+                Un <strong>óptimo local</strong> es una buena dieta que no mejora cambiando un solo
+                alimento; el <strong>óptimo global</strong> es la mejor dieta posible en todo el
+                universo de <code>2<sup>N</sup></code> combinaciones.
+              </p>
+            </div>
+            <div class="mini-box">
+              <span class="tag-pill amber">Presión selectiva</span>
+              <p>
+                Qué tan fuerte es la preferencia por los mejores individuos al reproducirse. Un
+                torneo con <code>k = 2</code> presiona poco; <code>k = 3</code> da buen equilibrio;
+                <code>k = 10</code> acelera mucho pero mata la diversidad genética.
+              </p>
+            </div>
+            <div class="mini-box">
+              <span class="tag-pill">Estancamiento</span>
+              <p>
+                Ocurre cuando la mejor proteína factible deja de crecer más de
+                <code>ε = 0.01 g</code> durante muchas generaciones seguidas (25 % del máximo),
+                indicando que el AGS ya convergió y puede detenerse ahorrando cómputo.
+              </p>
+            </div>
+            <div class="mini-box">
+              <span class="tag-pill rose">Determinismo / Semilla</span>
+              <p>
+                Aunque un AGS usa azar, en ciencia debe ser <strong>reproducible</strong>. Al usar
+                el generador <code>mulberry32</code> con semilla fija (ej. <code>42</code>), repetir
+                la corrida genera la misma secuencia de números y resultados verificables.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. PLANTEAMIENTO DEL PROBLEMA -->
+        <section class="card" id="introduccion">
+          <h2>
+            <span class="sec-num">2</span> El Problema de la Dieta (Mochila 0-1 Multidimensional)
+          </h2>
+          <p>
+            El <strong>Problema de la Dieta</strong> busca construir un menú diario seleccionando
+            porciones estándar de un catálogo de <strong>N = 30 alimentos</strong> (referenciados al
+            Sistema Mexicano de Alimentos Equivalentes <em>SMAE</em> y tablas <em>USDA</em>, con
+            precios aproximados en MXN) que <strong>maximice la proteína total diaria</strong> sin
+            sobrepasar simultáneamente dos límites estrictos: <strong>2,000 kcal</strong> y
+            <strong>$150 MXN</strong>.
+          </p>
+          <p>
+            Matemáticamente es equivalente al clásico
+            <strong>Problema de la Mochila 0-1 Multidimensional (MKP)</strong>: imagina una mochila
+            que tiene <em>dos</em> límites simultáneos —un peso máximo en calorías y un costo máximo
+            en pesos mexicanos— y cada alimento es un objeto que aporta valor (gramos de proteína) y
+            solo puede meterse una vez (<code>1</code>) o dejarse fuera (<code>0</code>).
+          </p>
+          <div class="grid-2">
+            <div class="mini-box">
+              <h4>¿Por qué no fuerza bruta ni un algoritmo voraz simple?</h4>
+              <p>
+                Con 30 alimentos existen <strong>2<sup>30</sup> = 1,073,741,824</strong>
+                combinaciones posibles, y cada alimento nuevo duplica el esfuerzo
+                (<code>O(2<sup>N</sup>)</code>, problema NP-hard). Un método voraz (elegir primero
+                lo de más proteína) falla porque el bistec o la tilapia agotan rápido el presupuesto
+                de $150 MXN, mientras que elegir lo más barato agota las 2,000 kcal con poca
+                proteína.
+              </p>
+            </div>
+            <div class="mini-box">
+              <h4>Compromisos reales en el catálogo de 30 alimentos</h4>
+              <p>
+                El catálogo completo suma <strong>4,249 kcal</strong> y
+                <strong>$352.50 MXN</strong>, superando holgadamente ambos límites. Incluye 14
+                fuentes ricas en proteína (≥ 12 g: pollo, atún, huevo, soya, lentejas, queso panela,
+                yogur griego, sardinas, etc.) mezcladas con 8 categorías completas y distractores
+                económicos altos en energía (tortilla, arroz, avena, galletas).
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. MODELO MATEMÁTICO -->
+        <section class="card" id="modelo-matematico">
+          <h2><span class="sec-num">3</span> Formulación Matemática Completa</h2>
+
+          <h3>3.1 Codificación binaria (Cromosoma)</h3>
+          <div class="formula-box">
+            <div class="formula-math">
+              <strong>x</strong> = (x<sub>1</sub>, x<sub>2</sub>, …, x<sub>N</sub>) ∈ {0, 1}<sup
+                >N</sup
+              >
+            </div>
+            <div class="formula-caption">
+              Donde <code>x<sub>i</sub> = 1</code> indica que la porción estándar del alimento
+              <code>i</code> se incluye en el menú diario y <code>x<sub>i</sub> = 0</code> indica
+              que se excluye.
+            </div>
+          </div>
+
+          <h3>3.2 Función objetivo y restricciones duras (Mochila 0-1 Multidimensional)</h3>
+          <div class="formula-box">
+            <div class="formula-math">
+              Maximizar &nbsp; P(<strong>x</strong>) = ∑<sub>i=1..N</sub> (x<sub>i</sub> ·
+              p<sub>i</sub>)
+            </div>
+            <div class="formula-math">
+              Sujeto a: &nbsp;&nbsp; C(<strong>x</strong>) = ∑<sub>i=1..N</sub> (x<sub>i</sub> ·
+              c<sub>i</sub>) ≤ C<sub>max</sub> &nbsp;&nbsp; y &nbsp;&nbsp; K(<strong>x</strong>) =
+              ∑<sub>i=1..N</sub> (x<sub>i</sub> · k<sub>i</sub>) ≤ B<sub>max</sub>
+            </div>
+            <div class="formula-caption">
+              <code>p<sub>i</sub></code> = proteína (g), <code>c<sub>i</sub></code> = calorías
+              (kcal), <code>k<sub>i</sub></code> = costo (MXN) del alimento <code>i</code>; por
+              defecto <code>C<sub>max</sub> = 2,000 kcal</code> y
+              <code>B<sub>max</sub> = $150 MXN</code>.
+            </div>
+          </div>
+
+          <h3>3.3 Función de aptitud con penalización estática</h3>
+          <div class="formula-box">
+            <div class="formula-math">
+              f(<strong>x</strong>) = P(<strong>x</strong>) &nbsp;&nbsp; si C(<strong>x</strong>) ≤
+              C<sub>max</sub> ∧ K(<strong>x</strong>) ≤ B<sub>max</sub>
+            </div>
+            <div class="formula-math">
+              f(<strong>x</strong>) = α · P(<strong>x</strong>) &nbsp;&nbsp; en caso contrario
+              &nbsp; (α = 0.001 por defecto)
+            </div>
+            <div class="formula-caption">
+              Cualquier dieta infactible ve su aptitud multiplicada por <code>0.001</code>, por lo
+              que pierde los torneos frente a cualquier dieta factible con proteína positiva.
+              Además, el motor
+              <strong>nunca reporta un individuo infactible como Mejor Individuo Global</strong>.
+            </div>
+          </div>
+
+          <h3>3.4 Diversidad poblacional exacta (Hamming normalizada en O(P · N))</h3>
+          <div class="formula-box">
+            <div class="formula-math">
+              D = [ 2 / (N · P · (P − 1)) ] · ∑<sub>j=1..N</sub> c<sub>j</sub> · (P − c<sub>j</sub>)
+              &nbsp; ∈ [0, 1]
+            </div>
+            <div class="formula-caption">
+              Donde <code>P</code> es el tamaño de población y <code>c<sub>j</sub></code> es cuántos
+              individuos tienen <code>1</code> en el gen <code>j</code>. En esa columna exactamente
+              <code>c<sub>j</sub>(P − c<sub>j</sub>)</code> pares de individuos difieren. Esto
+              entrega el valor <strong>matemáticamente exacto</strong> de la distancia de Hamming
+              promedio entre todos los pares <code>P(P−1)/2</code>, pero es ~250× más rápido a
+              escala 500 × 2,000.
+            </div>
+          </div>
+
+          <h3>3.5 Criterio de paro e igualdad contra Búsqueda Aleatoria</h3>
+          <ul>
+            <li>
+              <strong>Paro por máximo de generaciones:</strong> se detiene al completar
+              <code>G<sub>max</sub></code>
+              (default 100).
+            </li>
+            <li>
+              <strong>Paro por estancamiento:</strong> se detiene si el mejor individuo factible no
+              mejora más de <code>ε = 0.01 g</code> durante
+              <code>round(G<sub>max</sub> × porcentaje / 100)</code> generaciones consecutivas
+              (default 25 % = 25 generaciones; <code>0 %</code> lo desactiva).
+            </li>
+            <li>
+              <strong>Igualdad de presupuesto de evaluaciones:</strong> el
+              <code>EvaluadorAleatorio</code> genera exactamente
+              <code>P × G<sub>ejecutadas</sub></code> dietas con el mismo
+              <code>p<sub>inicial</sub> = 0.20</code> y la misma semilla base, agrupándolas en
+              bloques de tamaño <code>P</code> para graficarlas en el mismo eje X que el AGS.
+            </li>
+          </ul>
+        </section>
+
+        <!-- 4. PROCESO PASO A PASO -->
+        <section class="card" id="proceso-ags">
+          <h2><span class="sec-num">4</span> Proceso del Algoritmo Genético Paso a Paso</h2>
+          <p>
+            A continuación se describe exactamente qué ocurre dentro de
+            <code>MotorAGS.ts</code> desde que el usuario presiona <strong>Ejecutar</strong> hasta
+            que aparece el menú óptimo en pantalla:
+          </p>
+          <ol class="step-list">
+            <li class="step-item">
+              <div class="step-badge">1</div>
+              <div>
+                <strong
+                  >Serialización hacia el Web Worker y semilla determinista (Mulberry32)</strong
+                ><br />
+                El Controller obtiene snapshots inmutables de <code>CatalogoRepositorio</code> y
+                <code>ConfiguracionGlobal</code> y los envía al Web Worker vía <code>Comlink</code>.
+                El motor inicializa <code>crearRNG(semilla)</code> (por defecto <code>42</code>),
+                prohibiendo el uso de <code>Math.random()</code> para garantizar reproducibilidad
+                exacta.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">2</div>
+              <div>
+                <strong>Generación de la población inicial sesgada (PoblacionFactory)</strong><br />
+                Se crean <code>P = 50</code> cromosomas binarios de longitud
+                <code>N = 30</code> donde cada gen vale <code>1</code> con probabilidad
+                <code>p<sub>inicial</sub> = 0.20</code> (~6 alimentos por dieta). Con
+                <code>0.50</code> (~15 alimentos), el promedio calórico sería ~2,124 kcal y casi
+                toda la población inicial nacería infactible.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">3</div>
+              <div>
+                <strong>Evaluación nutricional y penalización estática</strong><br />
+                Para cada individuo se suman proteína, calorías y costo de los genes en
+                <code>1</code>. Si cumple <code>calorías ≤ 2,000</code> y <code>costo ≤ $150</code>,
+                su aptitud es <code>proteinaTotal</code>; si excede alguna restricción, se invoca
+                <code>PenalizacionEstatica</code> (<code>proteinaTotal × 0.001</code>).
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">4</div>
+              <div>
+                <strong>Actualización del mejor factible global y notificación Observer</strong
+                ><br />
+                Se identifica el mejor individuo <strong>factible</strong> de la generación. Si
+                supera al mejor factible global en más de <code>ε = 0.01 g</code>, se actualiza y se
+                reinicia el contador de estancamiento. Se calculan <code>mejorAptitud</code>,
+                <code>aptitudPromedio</code>, <code>porcentajeFactibles</code> y
+                <code>diversidad</code>, y <code>SujetoProgreso.notificar()</code> emite el
+                <code>ReporteGeneracion</code> al hilo principal.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">5</div>
+              <div>
+                <strong>Verificación de condiciones de paro</strong><br />
+                Si <code>generacion === maxGeneraciones</code> o si
+                <code>generacionesSinMejora ≥ limiteEstancamiento</code>
+                (o si el usuario pulsó Detener), termina el ciclo evolutivo.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">6</div>
+              <div>
+                <strong>Elitismo opcional (e = 0 por defecto)</strong><br />
+                En el modo canónico del anteproyecto (<code>e = 0</code>), toda la nueva población
+                se forma por operadores genéticos. Si el usuario activa <code>e &gt; 0</code> en
+                Configuración, los <code>e</code> mejores individuos se clonan intactos a la
+                siguiente generación.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">7</div>
+              <div>
+                <strong
+                  >Selección por torneo (k = 3) + Cruce de un punto (Pc = 0.80) + Mutación bit-flip
+                  (Pm = 1/N)</strong
+                ><br />
+                Hasta completar <code>P</code> individuos: se eligen dos progenitores ganando
+                torneos de 3 individuos al azar; con probabilidad <code>0.80</code> se cortan en un
+                índice aleatorio <code>q ∈ [1, N−1]</code> intercambiando sus colas; finalmente cada
+                bit de cada hijo se invierte independientemente con probabilidad
+                <code>Pm ≈ 0.0333</code>. Se regresa al Paso 3.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">8</div>
+              <div>
+                <strong>Evaluación justa de la línea base aleatoria y renderizado final</strong
+                ><br />
+                Al concluir el AGS con <code>G</code> generaciones, el Worker ejecuta
+                automáticamente <code>EvaluadorAleatorio</code> con <code>P × G</code> dietas
+                aleatorias y devuelve ambos resultados al Store Zustand para actualizar los 4 KPIs,
+                los gauges radiales, la curva de convergencia y el menú óptimo con su tira binaria.
+              </div>
+            </li>
+          </ol>
+
+          <h3 id="guia-parametros">
+            4B. Guía Maestra de los 11 Parámetros (Qué pasa si los subes o bajas)
+          </h3>
+          <p>
+            Esta tabla te sirve como acordeón definitivo: explica en lenguaje simple qué controla
+            cada parámetro de la pestaña <strong>Configuración</strong> y cómo altera el resultado:
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Parámetro</th>
+                <th>Default</th>
+                <th>Qué significa</th>
+                <th>Si es MUY BAJO</th>
+                <th>Si es MUY ALTO</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Población (<code>P</code>)</strong></td>
+                <td><code>50</code></td>
+                <td>Cuántas dietas compiten al mismo tiempo en cada generación.</td>
+                <td>Poca variedad; se estanca pronto en dietas mediocres.</td>
+                <td>Más diversidad y calidad, pero tarda más milisegundos.</td>
+              </tr>
+              <tr>
+                <td><strong>Generaciones (<code>G</code>)</strong></td>
+                <td><code>100</code></td>
+                <td>Cuántas rondas máximas de evolución se ejecutan.</td>
+                <td>Corta el aprendizaje antes de acercarse al óptimo.</td>
+                <td>Más oportunidades de mejorar; el estancamiento lo frena si ya no sube.</td>
+              </tr>
+              <tr>
+                <td><strong>Prob. de cruce (<code>Pc</code>)</strong></td>
+                <td><code>0.80</code></td>
+                <td>Frecuencia con que dos padres mezclan sus cromosomas.</td>
+                <td>Casi solo clona padres; tarda mucho en combinar bloques buenos.</td>
+                <td>Mezcla muy intensa; con <code>0.80–0.90</code> suele funcionar óptimo.</td>
+              </tr>
+              <tr>
+                <td><strong>Prob. de mutación (<code>Pm</code>)</strong></td>
+                <td><code>1/N ≈ 0.033</code></td>
+                <td>Probabilidad de voltear cada bit (<code>0↔1</code>) de un hijo.</td>
+                <td>Se queda sin ideas nuevas (convergencia prematura).</td>
+                <td>Destruye las buenas dietas; se vuelve casi búsqueda aleatoria.</td>
+              </tr>
+              <tr>
+                <td><strong>Torneo (<code>k</code>)</strong></td>
+                <td><code>3</code></td>
+                <td>Cuántos individuos compiten para elegir a un padre.</td>
+                <td><code>k=2</code>: presión suave, converge más lento.</td>
+                <td><code>k=10</code>: solo ganan 1 o 2 super-individuos; mata diversidad.</td>
+              </tr>
+              <tr>
+                <td><strong>Elitismo (<code>e</code>)</strong></td>
+                <td><code>0</code></td>
+                <td>Cuántos mejores pasan intactos sin cruzar ni mutar.</td>
+                <td><code>0</code>: AGS canónico fiel al anteproyecto (puede oscilar).</td>
+                <td><code>1–2</code>: garantiza que la mejor aptitud de la gen nunca baje.</td>
+              </tr>
+              <tr>
+                <td><strong>Prob. inicial (<code>p_inicial</code>)</strong></td>
+                <td><code>0.20</code></td>
+                <td>Fracción inicial de alimentos marcados en <code>1</code>.</td>
+                <td><code>0.05</code>: dietas casi vacías (1–2 alimentos).</td>
+                <td>
+                  <code>0.50+</code>: ~15 alimentos → casi todos nacen infactibles (&gt;2,000 kcal).
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Penalización (<code>α</code>)</strong></td>
+                <td><code>0.001</code></td>
+                <td>Castigo multiplicativo a dietas que exceden calorías o costo.</td>
+                <td>Castigo muy severo (casi 0); expulsa inmediatamente infactibles.</td>
+                <td>
+                  Si <code>α</code> es grande (ej. <code>0.5</code>), una dieta infactible podría
+                  ganar torneos.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Estancamiento (%)</strong></td>
+                <td><code>25 %</code></td>
+                <td>% de <code>G</code> seguidas sin mejorar para detenerse antes.</td>
+                <td>
+                  <code>0 %</code>: se desactiva (corre siempre las <code>G</code> completas).
+                </td>
+                <td>Tarda más en cortar aunque la curva ya sea totalmente plana.</td>
+              </tr>
+              <tr>
+                <td><strong>Épsilon (<code>ε</code>)</strong></td>
+                <td><code>0.01 g</code></td>
+                <td>Mejora mínima en proteína que cuenta como «avance real».</td>
+                <td>Cualquier micro-cambio reinicia el contador.</td>
+                <td>Ignora mejoras pequeñas de 0.5–1 g y detiene la corrida antes.</td>
+              </tr>
+              <tr>
+                <td><strong>Semilla</strong></td>
+                <td><code>42</code></td>
+                <td>Número entero que arranca el generador <code>mulberry32</code>.</td>
+                <td colspan="2">
+                  No es «mejor ni peor» ser grande o chica: solo fija la secuencia exacta de azar
+                  para que tú y el profesor obtengan el mismo resultado al repetir la prueba.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- 5. EJEMPLO TRAZADO -->
+        <section class="card" id="ejemplo-trazado">
+          <h2><span class="sec-num">5</span> Ejemplo Numérico Trazado (Para Explicar en Clase)</h2>
+          <p>
+            Supongamos un catálogo reducido de <strong>N = 5 alimentos</strong> con límites
+            <code>C<sub>max</sub> = 500 kcal</code> y <code>B<sub>max</sub> = $50 MXN</code>:
+          </p>
+          <table>
+            <thead>
+              <tr>
+                <th>Gen</th>
+                <th>Alimento</th>
+                <th>Proteína (g)</th>
+                <th>Calorías (kcal)</th>
+                <th>Costo (MXN)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <code>x<sub>1</sub></code>
+                </td>
+                <td>Pechuga de pollo (120 g)</td>
+                <td>31.0 g</td>
+                <td>165 kcal</td>
+                <td>$24</td>
+              </tr>
+              <tr>
+                <td>
+                  <code>x<sub>2</sub></code>
+                </td>
+                <td>Atún en agua (100 g)</td>
+                <td>24.0 g</td>
+                <td>116 kcal</td>
+                <td>$22</td>
+              </tr>
+              <tr>
+                <td>
+                  <code>x<sub>3</sub></code>
+                </td>
+                <td>Huevo cocido (2 pzas)</td>
+                <td>12.6 g</td>
+                <td>143 kcal</td>
+                <td>$9</td>
+              </tr>
+              <tr>
+                <td>
+                  <code>x<sub>4</sub></code>
+                </td>
+                <td>Frijoles negros (1 taza)</td>
+                <td>14.5 g</td>
+                <td>227 kcal</td>
+                <td>$8.5</td>
+              </tr>
+              <tr>
+                <td>
+                  <code>x<sub>5</sub></code>
+                </td>
+                <td>Arroz blanco (1 taza)</td>
+                <td>4.3 g</td>
+                <td>205 kcal</td>
+                <td>$5</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="grid-2">
+            <div class="mini-box">
+              <h4>Evaluación de dos padres</h4>
+              <p>
+                <strong>Padre A = <code>[1, 0, 1, 1, 0]</code></strong> (Pollo + Huevo + Frijol):<br />
+                Proteína = <code>58.1 g</code> · Calorías = <code>535 kcal</code> (&gt; 500,
+                ¡excede!) · Costo = <code>$41.5</code>.<br />
+                Infactible → <code>aptitud = 58.1 × 0.001 = 0.0581</code>.
+              </p>
+              <p>
+                <strong>Padre B = <code>[0, 1, 1, 0, 1]</code></strong> (Atún + Huevo + Arroz):<br />
+                Proteína = <code>40.9 g</code> · Calorías = <code>464 kcal</code> (≤ 500) · Costo =
+                <code>$36</code> (≤ 50).<br />
+                Factible → <code>aptitud = 40.9</code>.
+              </p>
+            </div>
+            <div class="mini-box">
+              <h4>Cruce (q = 2) + Mutación (bit 5)</h4>
+              <p>
+                Al cruzar A y B tras el gen 2:<br />
+                <code>Hijo 1 = [1, 0 | 1, 0, 1]</code> → Pollo + Huevo + Arroz =
+                <code>47.9 g</code>, <code>513 kcal</code> (infactible).<br />
+                Si muta el gen 5 (<code>1 → 0</code>):<br />
+                <code>Hijo 1' = [1, 0, 1, 0, 0]</code> → Pollo + Huevo = <strong>43.6 g</strong>,
+                <strong>308 kcal</strong>, <strong>$33</strong> →
+                <strong style="color: #34d399">¡Factible y superior al Padre B!</strong>
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. CÓMO INTERPRETAR LAS GRÁFICAS, DIVERSIDAD E IMPACTO DE Pc Y Pm -->
+        <section class="card" id="interpretacion-graficas">
+          <h2>
+            <span class="sec-num">6</span> Cómo Interpretar las Gráficas, la Diversidad y el Impacto
+            de Pc y Pm
+          </h2>
+          <p>
+            Saber leer correctamente los indicadores visuales del dashboard permite justificar con
+            rigor científico que el AGS realmente está aprendiendo y evolucionando (y no solo
+            acertando por suerte):
+          </p>
+
+          <div class="grid-3">
+            <div class="mini-box">
+              <span class="tag-pill">Línea azul · Mejor AGS</span>
+              <h4>Ascenso escalonado hacia el óptimo</h4>
+              <p>
+                Representa el récord acumulado de proteína factible
+                (<code>mejorFactibleGlobal</code>). Siempre es no decreciente: sube bruscamente en
+                las primeras 15–35 generaciones cuando el cruce ensambla buenas fuentes proteicas y
+                se estabiliza en meseta al acercarse al techo de 2,000 kcal y $150 MXN.
+              </p>
+            </div>
+            <div class="mini-box">
+              <span class="tag-pill">Área translúcida · Promedio AGS</span>
+              <h4>Salud evolutiva de toda la población</h4>
+              <p>
+                Muestra la aptitud promedio de los <code>P</code> individuos en cada generación.
+                Fluctúa ligeramente porque los hijos infactibles reciben penalización (<code
+                  >× 0.001</code
+                >), pero su tendencia ascendente demuestra que toda la población migra hacia dietas
+                mejores.
+              </p>
+            </div>
+            <div class="mini-box">
+              <span class="tag-pill amber">Línea ámbar punteada · Aleatorio</span>
+              <h4>Línea base justa (sin aprendizaje)</h4>
+              <p>
+                Evalúa exactamente el mismo número de dietas al azar sin herencia ni selección. Se
+                estanca pronto porque encontrar combinaciones simultáneamente altas en proteína y
+                dentro de dos restricciones por puro azar es exponencialmente improbable. La brecha
+                azul vs. ámbar cuantifica la ganancia de la IA.
+              </p>
+            </div>
+          </div>
+
+          <h3>6.1 Lectura de la diversidad de Hamming y la marca «Convergió»</h3>
+          <ul>
+            <li>
+              <strong>Diversidad inicial (~0.32 con <code>p_inicial = 0.20</code>):</strong> los
+              individuos difieren en cerca de un tercio de sus genes; hay amplio material genético
+              para recombinar.
+            </li>
+            <li>
+              <strong>Diversidad al converger (~0.08–0.15):</strong> la mayoría de la población
+              coincide en los alimentos ganadores (pollo, atún, soya, lentejas, huevo, queso panela,
+              yogur griego), mientras la mutación mantiene un pequeño grado de exploración para
+              intentar mejoras finas.
+            </li>
+            <li>
+              <strong>Línea vertical punteada «Convergió»:</strong> señala la generación exacta en
+              que se encontró el último salto de proteína superior a <code>ε = 0.01 g</code>. Si
+              transcurre el 25 % del máximo sin superarla, el criterio de estancamiento detiene la
+              corrida.
+            </li>
+          </ul>
+
+          <h3>6.2 Efecto experimental de los parámetros Pc y Pm (Pestaña Experimentos)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Régimen</th>
+                <th>Valores típicos</th>
+                <th>Comportamiento observable en el Heatmap y Curvas</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Mutación muy baja</strong></td>
+                <td><code>Pm ≤ 0.005</code></td>
+                <td>
+                  Converge muy rápido pero suele estancarse antes en óptimos locales por pérdida
+                  prematura de diversidad.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Zona balanceada (óptima)</strong></td>
+                <td><code>Pc ∈ [0.7, 0.9]</code>, <code>Pm ≈ 1/N (0.02–0.04)</code></td>
+                <td>
+                  Logra las celdas más brillantes del heatmap: combina eficientemente buenos bloques
+                  constructores y conserva suficiente mutación (~1 bit mutado por individuo) para
+                  escapar de óptimos locales.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Mutación alta</strong></td>
+                <td><code>Pm ≥ 0.08</code></td>
+                <td>
+                  Mantiene alta diversidad pero altera 2–3 genes por hijo en cada generación,
+                  rompiendo buenas dietas ya encontradas y reduciendo la proteína media.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- 7. CÓMO SE DESARROLLÓ EL PROYECTO EN 5 FASES -->
+        <section class="card" id="desarrollo-fases">
+          <h2>
+            <span class="sec-num">7</span> Proceso de Desarrollo del Proyecto (Ingeniería en 5
+            Fases)
+          </h2>
+          <p>
+            El software se construyó siguiendo una estrategia
+            <strong>de adentro hacia afuera</strong>
+            (primero las matemáticas y pruebas unitarias puras; al final la interfaz visual), lo que
+            asegura que cada pieza esté verificada antes de integrarse:
+          </p>
+
+          <div class="phase-grid">
+            <div class="phase-card">
+              <span class="tag-pill">Fase 1</span>
+              <h4>Estructura y Modelos</h4>
+              <p>
+                Configuración de Vite + TypeScript estricto + Tailwind v4 + Vitest + reglas MVC en
+                ESLint. Se implementaron <code>rng.ts</code> (Mulberry32), <code>Alimento</code>,
+                <code>Individuo</code> y el catálogo SMAE/USDA de 30 alimentos (27 pruebas, 100 %
+                cobertura).
+              </p>
+            </div>
+            <div class="phase-card">
+              <span class="tag-pill">Fase 2</span>
+              <h4>Patrones y Motor</h4>
+              <p>
+                Implementación de <strong>Strategy</strong>, <strong>Factory</strong>,
+                <strong>Observer</strong> y <strong>Singleton</strong>, más
+                <code>MotorAGS</code> (elitismo, paro por estancamiento, diversidad
+                <code>O(P·N)</code>) y <code>EvaluadorAleatorio</code> (62 pruebas, 97.5 %
+                cobertura).
+              </p>
+            </div>
+            <div class="phase-card">
+              <span class="tag-pill">Fase 3</span>
+              <h4>Worker y Controller</h4>
+              <p>
+                Se movió el motor a un Web Worker ES con <code>Comlink</code> (pausa/reanudación en
+                vuelo, <code>R</code> corridas y barrido <code>Pc × Pm</code>), conectado al Store
+                Zustand mediante <code>useAGSController</code> con throttling de 34 ms (71 pruebas).
+              </p>
+            </div>
+            <div class="phase-card">
+              <span class="tag-pill">Fase 4</span>
+              <h4>Sistema Visual Glassy</h4>
+              <p>
+                Construcción del layout a pantalla completa <em>Glassy Dashboard</em>: fondo carbón
+                con luz dual y grano SVG, tarjetas translúcidas multicapa, Sidebar en píldora,
+                Topbar con <code>layoutId</code>, Gauge radial con 60 ticks y Skeleton Loaders.
+              </p>
+            </div>
+            <div class="phase-card">
+              <span class="tag-pill emerald">Fase 5</span>
+              <h4>Vistas y Exportación</h4>
+              <p>
+                Integración de las 5 vistas reales, gráfica de dona por categoría, cromosoma 15×2
+                con flip <code>rotateX</code>, modal matemático <strong>KaTeX</strong>, exportación
+                PNG/CSV/JSON para el reporte final y esta guía técnica autocontenida.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- 8. ARQUITECTURA Y PATRONES -->
+        <section class="card" id="arquitectura">
+          <h2>
+            <span class="sec-num">8</span> Arquitectura MVC, 4 Patrones de Diseño y Web Worker
+          </h2>
+          <p>
+            El proyecto sigue una separación estricta
+            <strong>Modelo – Vista – Controlador (MVC)</strong> protegida mecánicamente por reglas
+            en <code>eslint.config.js</code>:
+          </p>
+
+          <div class="arch-flow">
+            <div class="arch-node">
+              <strong>Vista (React .tsx)</strong>
+              <span>Solo lee Zustand e invoca acciones del Controller. Cero lógica del AGS.</span>
+            </div>
+            <div class="arch-node">
+              <strong>Store (Zustand)</strong>
+              <span>Estado reactivo único actualizado únicamente por el Controller.</span>
+            </div>
+            <div class="arch-node highlight">
+              <strong>Controller</strong>
+              <span
+                ><code>useAGSController</code>: valida, hace throttling (34 ms) y coordina el
+                Worker.</span
+              >
+            </div>
+            <div class="arch-node highlight">
+              <strong>Web Worker</strong>
+              <span
+                >Comlink en hilo separado. Cede cada ~12 ms para pausar/detener sin trabar.</span
+              >
+            </div>
+            <div class="arch-node">
+              <strong>Models + Patterns</strong>
+              <span>100 % TypeScript puro (sin React ni DOM). Probado con Vitest en Node.</span>
+            </div>
+          </div>
+
+          <h3>Los 4 patrones de diseño implementados</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Patrón</th>
+                <th>Clases / Interfaces</th>
+                <th>Ubicación</th>
+                <th>Problema que resuelve</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Strategy</strong></td>
+                <td>
+                  <code>SeleccionTorneo</code>, <code>CruceUnPunto</code>,
+                  <code>MutacionBitFlip</code>, <code>PenalizacionEstatica</code>
+                </td>
+                <td><code>src/patterns/strategy/</code></td>
+                <td>
+                  Desacopla cada operador evolutivo y la penalización del motor. Permite cambiar a
+                  penalización proporcional o cruce uniforme sin tocar una línea de
+                  <code>MotorAGS</code>.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Factory</strong></td>
+                <td><code>AlimentoFactory</code>, <code>PoblacionFactory</code></td>
+                <td><code>src/patterns/factory/</code></td>
+                <td>
+                  Centraliza la validación estricta de objetos JSON del catálogo (IDs únicos, tipos)
+                  y la creación de poblaciones iniciales sesgadas con RNG inyectado.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Observer</strong></td>
+                <td><code>SujetoProgreso</code></td>
+                <td><code>src/patterns/observer/</code></td>
+                <td>
+                  Permite que <code>MotorAGS</code> emita un <code>ReporteGeneracion</code> cada
+                  <code>K</code> generaciones sin acoplarse a React ni al transporte del Worker.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Singleton</strong></td>
+                <td><code>CatalogoRepositorio</code>, <code>ConfiguracionGlobal</code></td>
+                <td><code>src/patterns/singleton/</code></td>
+                <td>
+                  Fuente única de verdad con persistencia en <code>localStorage</code>. Siempre
+                  devuelven snapshots inmutables serializables para enviar al Web Worker.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="callout">
+            <strong>Por qué la UI nunca se congela (500 población × 2,000 generaciones):</strong>
+            (1) El cálculo vive en un Web Worker independiente del hilo de renderizado; (2) el
+            Worker cede turnos cada ~12 ms para atender
+            <code>pausar()</code>/<code>detener()</code>; (3) el Controller agrupa reportes en lotes
+            cada <code>34 ms</code> (~30 FPS máx.) para que Recharts no sature React; y (4) la
+            diversidad de Hamming se calcula en <code>O(P · N)</code>.
+          </div>
+
+          <h3 id="viaje-clic">
+            8B. Viaje Completo de un Clic: Qué Hace el Programa Por Dentro al Pulsar «Ejecutar»
+          </h3>
+          <p>
+            Para entender cómo se conectan todos los archivos del código fuente, sigue exactamente
+            lo que ocurre en menos de 10 milisegundos desde que haces clic en el botón circular de
+            Play:
+          </p>
+          <ol class="step-list">
+            <li class="step-item">
+              <div class="step-badge">1</div>
+              <div>
+                <strong>Interfaz (<code>Topbar.tsx</code> → <code>App.tsx</code>):</strong>
+                Detecta tu clic y llama a <code>controller.ejecutar()</code>. El componente React no
+                hace ningún cálculo matemático.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">2</div>
+              <div>
+                <strong>Preparación en el Controller (<code>useAGSController.ts</code>):</strong>
+                Pone el estado en <code>'cargando'</code> (lo que enciende los
+                <em>Skeleton Loaders</em>), pide una <strong>copia serializable</strong> del
+                catálogo a <code>CatalogoRepositorio</code> y de los parámetros a
+                <code>ConfiguracionGlobal</code>.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">3</div>
+              <div>
+                <strong
+                  >Envío al Web Worker (<code>workerClient.ts</code> +
+                  <code>Comlink</code>):</strong
+                >
+                Envía las copias por mensaje al hilo secundario (<code>agsWorker.ts</code>). Así el
+                hilo principal queda 100 % libre para animaciones, scroll y botones de pausa.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">4</div>
+              <div>
+                <strong
+                  >Evolución en segundo plano (<code>agsWorkerService.ts</code> →
+                  <code>MotorAGS.ts</code>):</strong
+                >
+                Construye los 30 <code>Alimento</code>, crea la población inicial con
+                <code>PoblacionFactory</code>, ejecuta torneo → cruce → mutación generación por
+                generación y notifica cada reporte al <code>SujetoProgreso</code> (Observer). Al
+                terminar, corre <code>EvaluadorAleatorio</code> con el mismo presupuesto exacto.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">5</div>
+              <div>
+                <strong
+                  >Actualización controlada y renderizado (<code>useAGSStore.ts</code> →
+                  <code>ResumenView.tsx</code>):</strong
+                >
+                El Controller recibe el resultado final, invalida cualquier mensaje tardío y
+                actualiza el store Zustand. Automáticamente React dibuja el count-up de los 4 KPIs,
+                el barrido spring del gauge, el flip <code>rotateX</code> de los 30 bits del
+                cromosoma, la curva <code>pathLength</code> con marca <em>«Convergió»</em>, la dona
+                de categorías y el menú óptimo con destello de borde.
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <!-- 9. ESTRUCTURA DEL CÓDIGO -->
+        <section class="card" id="estructura-codigo">
+          <h2><span class="sec-num">9</span> Estructura Completa del Código Fuente</h2>
+          <pre>
+AGS-IA/
+├── docs/
+│   └── guia-proyecto-ags-dieta.html        # Esta guía técnica autocontenida
+├── src/
+│   ├── data/
+│   │   └── catalogoInicial.ts              # 30 alimentos SMAE/USDA en 8 categorías (MXN 2026)
+│   ├── models/                             # [Cero imports de React, Zustand o DOM]
+│   │   ├── types.ts                        # Contratos e interfaces compartidas del dominio
+│   │   ├── Alimento.ts                     # Entidad inmutable con validación en constructor
+│   │   ├── Individuo.ts                    # Cromosoma binario N, evaluación, clonación y Hamming
+│   │   ├── MotorAGS.ts                     # Ciclo evolutivo, elitismo, estancamiento y diversidad O(P*N)
+│   │   ├── EvaluadorAleatorio.ts           # Línea base aleatoria con presupuesto exacto P × G
+│   │   ├── utils/rng.ts                    # PRNG determinista Mulberry32 + derivarSemilla
+│   │   └── __tests__/                      # Pruebas unitarias de RNG, Alimento, Individuo, Motor y Aleatorio
+│   ├── patterns/                           # [Cero imports de React, Zustand o DOM]
+│   │   ├── strategy/                       # Interfaces + Torneo, Cruce 1 punto, Bit-flip, Penalización estática
+│   │   ├── factory/                        # AlimentoFactory y PoblacionFactory
+│   │   ├── observer/                       # SujetoProgreso (suscribir/desuscribir/notificar)
+│   │   ├── singleton/                      # CatalogoRepositorio, ConfiguracionGlobal y storage seguro
+│   │   └── __tests__/                      # Pruebas unitarias de los 4 patrones
+│   ├── workers/
+│   │   ├── types.ts                        # Contrato RPC tipado de Comlink
+│   │   ├── agsWorkerService.ts             # Ejecución AGS, Comparativa R corridas y Barrido Pc × Pm
+│   │   ├── agsWorker.ts                    # Punto de entrada Comlink.expose()
+│   │   └── __tests__/                      # Pruebas de pausa/reanudación, comparativa y barrido
+│   ├── controllers/
+│   │   ├── useAGSController.ts             # Hook controlador MVC (acciones + throttling + sincronía N)
+│   │   ├── workerClient.ts                 # Cliente perezoso Comlink.wrap(new Worker(...))
+│   │   ├── validacion.ts                   # Validación en vivo de Configuración y Catálogo CRUD
+│   │   ├── comparativa.ts                  # Unión de curvas AGS/Aleatorio y evaluación Modo Humano
+│   │   └── __tests__/                      # Pruebas de validación y comparativa
+│   ├── store/
+│   │   └── useAGSStore.ts                  # Store Zustand (solo lectura desde la Vista)
+│   ├── views/
+│   │   ├── ResumenView.tsx                 # Bento Grid: 4 KPIs, Gauges, Curva, Menú óptimo y Cromosoma
+│   │   ├── ConfiguracionView.tsx           # Sliders + inputs con validación en vivo y semilla
+│   │   ├── CatalogoView.tsx                # Tabla buscable/ordenable + CRUD modal + restaurar
+│   │   ├── ComparativaView.tsx             # 3 métodos (AGS / Aleatorio / Humano) + R corridas
+│   │   └── ExperimentosView.tsx            # Barrido Pc × Pm + Heatmap interactivo + curvas superpuestas
+│   ├── components/
+│   │   ├── layout/                         # GlassyBackground, AppShell, Sidebar (píldora), Topbar
+│   │   ├── ui/                             # GlassCard, StatsCard, RadialGaugeCard, SlideConfirmCard,
+│   │   │                                   # ChromosomeStrip, GlassySkeleton, categoryColors
+│   │   ├── dashboard/                      # ConvergenceChartCard, ProteinByCategoryCard, OptimalMenuCard
+│   │   └── modals/                         # AcercaDelModeloModal (KaTeX), ExportarModal
+│   └── utils/
+│       └── exportacion.ts                  # PNG (html-to-image fondo sólido), CSV (UTF-8 BOM), JSON
+├── eslint.config.js                        # Reglas estrictas MVC (bloquea imports prohibidos)
+├── vitest.config.ts                        # Cobertura v8 ≥ 80 % sobre models y patterns
+└── vite.config.ts                          # Vite + React + Tailwind CSS v4 + Worker ES module</pre>
+        </section>
+
+        <!-- 10. GUÍA DE USO -->
+        <section class="card" id="guia-uso">
+          <h2><span class="sec-num">10</span> Guía Práctica de Uso (De Cero al Reporte Final)</h2>
+
+          <h3>10.1 Comandos para ejecutar el proyecto localmente</h3>
+          <pre>
+# 1. Instalar dependencias (solo la primera vez)
+npm install
+
+# 2. Levantar el servidor de desarrollo interactivo
+npm run dev
+
+# 3. Ejecutar las 71 pruebas unitarias y ver cobertura de /src/models y /src/patterns
+npm run test:coverage
+
+# 4. Compilar versión de producción y verificar calidad de código
+npm run build
+npm run lint</pre>
+
+          <h3>10.2 Recorrido recomendado por las 5 pestañas</h3>
+          <ol class="step-list">
+            <li class="step-item">
+              <div class="step-badge">A</div>
+              <div>
+                <strong>Resumen (Ejecución principal):</strong>
+                Presiona <strong>Ejecutar AGS</strong> (o el botón circular punteado en el Topbar).
+                Mientras se prepara verás los <em>skeleton loaders Glassy</em>; enseguida aparecerán
+                en tiempo real los 4 KPIs, los gauges con marcas de graduación (alterna el switch
+                azul entre <em>Calorías</em> y <em>Presupuesto</em>), la curva de convergencia (AGS
+                vs. Promedio vs. Aleatorio) y el menú diario con la tira de bits del cromosoma. Usa
+                <strong>Gráfica PNG</strong>, <strong>Historial CSV</strong> o el deslizador
+                <strong>Exportar JSON</strong> para guardar evidencia.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">B</div>
+              <div>
+                <strong>Configuración AGS y panel KaTeX:</strong>
+                Modifica calorías, presupuesto, tamaño de población (hasta 500), generaciones (hasta
+                2,000), elitismo (<code>e = 0</code> canónico vs. <code>e = 2</code>), estancamiento
+                o semilla. Abre <strong>Acerca del modelo (KaTeX)</strong> (también accesible desde
+                el ícono de libro en el Sidebar) para proyectar las fórmulas matemáticas durante tu
+                exposición.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">C</div>
+              <div>
+                <strong>Catálogo de Alimentos (CRUD):</strong>
+                Filtra por las 8 categorías, ordena por proteína/calorías/costo, edita porciones o
+                agrega nuevos alimentos. Observa que al cambiar <code>N</code>, la app reinicializa
+                el motor y actualiza <code>Pm = 1/N</code> automáticamente para nunca mezclar
+                cromosomas de distinta longitud.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">D</div>
+              <div>
+                <strong>Comparativa (AGS vs. Aleatorio vs. Humano):</strong>
+                Primero arma tu propia dieta en el panel izquierdo con el cronómetro activo (observa
+                cómo los medidores pasan a color rosa si excedes 2,000 kcal o $150 MXN) y pulsa
+                <strong>Registrar tiempo</strong>. Después ejecuta <strong>10 corridas</strong> del
+                par AGS vs. Aleatorio para demostrar en la tabla y gráfica superpuesta que el AGS
+                supera en calidad (g proteína) y velocidad (milisegundos vs. segundos) a ambos
+                enfoques.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">E</div>
+              <div>
+                <strong>Experimentos (Barrido Pc × Pm):</strong>
+                Selecciona combinaciones de <code>Pc</code> (ej. 0.6, 0.7, 0.8, 0.9) y
+                <code>Pm</code>
+                (ej. 0.01, 0.02, 0.03, 0.05) y ejecuta el barrido en el Worker. Haz clic en hasta 4
+                celdas del
+                <strong>Heatmap</strong> para superponer sus curvas de convergencia y exporta tanto
+                el heatmap en <strong>PNG</strong> como la tabla completa en <strong>CSV</strong>.
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <!-- 11. TRAZABILIDAD -->
+        <section class="card" id="trazabilidad">
+          <h2><span class="sec-num">11</span> Trazabilidad con el Anteproyecto y Calidad</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Requisito del anteproyecto</th>
+                <th>Dónde se demuestra en la aplicación</th>
+                <th>Verificación técnica</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Obj. esp. 1: codificación binaria de longitud N</td>
+                <td>
+                  Pestaña <strong>Catálogo</strong> (columna <code>x<sub>i</sub></code
+                  >) + tira de bits en <strong>Resumen</strong>
+                </td>
+                <td><code>Individuo.test.ts</code> + reinicio automático al cambiar N</td>
+              </tr>
+              <tr>
+                <td>Obj. esp. 2: aptitud con penalización estática</td>
+                <td>
+                  <strong>Resumen</strong> (aptitud e insignia Factible) + modal
+                  <strong>Acerca del modelo (KaTeX)</strong>
+                </td>
+                <td>
+                  <code>PenalizacionEstatica</code> (Strategy) + <code>strategy.test.ts</code>
+                </td>
+              </tr>
+              <tr>
+                <td>Obj. esp. 3: impacto de Pc y Pm y comparación vs. aleatorio</td>
+                <td>
+                  Pestañas <strong>Experimentos</strong> (heatmap + curvas) y
+                  <strong>Comparativa</strong> (R corridas)
+                </td>
+                <td><code>agsWorkerService.test.ts</code> + igualdad exacta <code>P × G</code></td>
+              </tr>
+              <tr>
+                <td>Resultado: dieta ≤ 2,000 kcal y ≤ presupuesto</td>
+                <td>
+                  <strong>Menú óptimo</strong> + <strong>Gauges radiales</strong> + insignia verde
+                  <em>Factible</em>
+                </td>
+                <td><code>MotorAGS.test.ts</code> (semilla 42: factible y ≥ aleatorio)</td>
+              </tr>
+              <tr>
+                <td>Resultado: curva de convergencia</td>
+                <td><strong>Resumen</strong> (gráfica Recharts en vivo exportable a PNG y CSV)</td>
+                <td>Throttling 34 ms + <code>combinarCurvasConvergencia</code></td>
+              </tr>
+              <tr>
+                <td>Resultado: superior en tiempo y calidad al humano/aleatorio</td>
+                <td>
+                  Pestaña <strong>Comparativa</strong> con cronómetro humano (s) y tiempos
+                  AGS/Aleatorio (ms)
+                </td>
+                <td>Tabla estadística media ± desviación + gráfica con línea humana</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- 12. DEFENSA ORAL -->
+        <section class="card" id="defensa-oral">
+          <h2>
+            <span class="sec-num">12</span> Guion de Exposición (5 Minutos) y Preguntas Frecuentes
+          </h2>
+
+          <h3>12.1 Guion sugerido paso a paso para presentar frente al docente</h3>
+          <ol class="step-list">
+            <li class="step-item">
+              <div class="step-badge">1'</div>
+              <div>
+                <strong>Problema y Modelo Matemático (Minuto 0–1):</strong>
+                Abre el modal <strong>Acerca del modelo (KaTeX)</strong> desde el ícono de libro del
+                Sidebar. Explica que es una mochila 0-1 multidimensional (<code
+                  >2<sup>30</sup></code
+                >
+                combinaciones), muestra la función objetivo de proteína, las dos restricciones duras
+                (2,000 kcal y $150 MXN) y la penalización estática <code>α = 0.001</code>.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">2'</div>
+              <div>
+                <strong>Ejecución en vivo en Resumen (Minuto 1–2):</strong>
+                Cierra el modal y pulsa el botón circular de ejecución en el Topbar (con semilla
+                <code>#42</code>). Señala el gauge radial con aprovechamiento calórico/presupuestal,
+                el cromosoma binario de 30 bits (1 = incluido), la gráfica de dona por categoría y
+                la curva de convergencia mostrando la brecha entre la línea azul (AGS) y la ámbar
+                (Aleatorio) y la marca vertical <em>«Convergió»</em>.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">3'</div>
+              <div>
+                <strong>Catálogo CRUD e integridad en N (Minuto 2–3):</strong>
+                Muestra brevemente la pestaña <strong>Catálogo</strong> (30 alimentos SMAE/USDA en 8
+                categorías) y explica que si se agrega o elimina un alimento, el Controller reinicia
+                el motor y recalcula <code>Pm = 1/N</code> para mantener consistencia del cromosoma.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">4'</div>
+              <div>
+                <strong>Comparativa 3 Métodos (Minuto 3–4):</strong>
+                En <strong>Comparativa</strong>, arma una dieta rápida en el modo humano para
+                mostrar el cronómetro y los medidores en rosa cuando se excede un límite; luego
+                lanza <strong>10 corridas</strong> para mostrar en tabla y gráfica que el AGS logra
+                mayor proteína en milisegundos frente a segundos del humano y supera al aleatorio
+                con igual presupuesto de evaluaciones.
+              </div>
+            </li>
+            <li class="step-item">
+              <div class="step-badge">5'</div>
+              <div>
+                <strong>Experimentos Pc × Pm y Arquitectura (Minuto 4–5):</strong>
+                Ejecuta un barrido en <strong>Experimentos</strong> (observa la barra de progreso
+                sin congelar la UI gracias al Web Worker), señala las mejores celdas del heatmap,
+                superpone 3 curvas y cierra explicando el patrón MVC + 4 patrones + 71 pruebas con
+                97.7 % de cobertura y exportación PNG/CSV/JSON.
+              </div>
+            </li>
+          </ol>
+
+          <h3>12.2 Preguntas frecuentes de evaluación docente</h3>
+
+          <details open>
+            <summary>
+              1. ¿Por qué inicializan la población con p_inicial = 0.20 en lugar de 0.50?
+            </summary>
+            <p>
+              El catálogo de 30 alimentos suma 4,249 kcal (promedio 141.6 kcal por porción). Con
+              <code>p = 0.50</code>, cada individuo tendría alrededor de 15 alimentos (~2,124 kcal y
+              ~$176 MXN), haciendo que la gran mayoría de la población inicial fuera infactible. Con
+              <code>p = 0.20</code>
+              (~6 alimentos, ~850 kcal y ~$70 MXN), el algoritmo arranca dentro de la región
+              factible y evoluciona acumulando alimentos de alta densidad proteica sin desperdiciar
+              generaciones buscando factibilidad.
+            </p>
+          </details>
+
+          <details>
+            <summary>2. ¿Por qué el elitismo es e = 0 por defecto?</summary>
+            <p>
+              Para respetar fielmente el <strong>AGS canónico</strong> planteado en el anteproyecto.
+              Sin embargo, el mejor individuo factible encontrado a lo largo de toda la corrida
+              siempre se rastrea por separado en <code>mejorFactibleGlobal</code>, y el parámetro
+              <code>e</code> es configurable desde la pestaña Configuración para demostrar
+              experimentalmente cómo el elitismo acelera la convergencia monótona.
+            </p>
+          </details>
+
+          <details>
+            <summary>
+              3. ¿Cómo garantizan que la comparación contra la búsqueda aleatoria es justa?
+            </summary>
+            <p>
+              Si el AGS corre con población <code>P = 50</code> durante <code>G</code> generaciones
+              (incluso si para anticipadamente por estancamiento en la generación 62), el
+              <code>EvaluadorAleatorio</code> evalúa exactamente <code>50 × G</code> dietas
+              aleatorias usando el mismo <code>p_inicial</code> y la misma semilla base, registrando
+              la mejor proteína acumulada cada 50 evaluaciones.
+            </p>
+          </details>
+
+          <details>
+            <summary>4. ¿Por qué usan Mulberry32 en lugar de Math.random()?</summary>
+            <p>
+              <code>Math.random()</code> en JavaScript no acepta semilla. Implementar
+              <strong>Mulberry32</strong> (32 bits) en
+              <code>src/models/utils/rng.ts</code> garantiza 100 % de reproducibilidad científica:
+              cualquier revisor que introduzca la semilla <code>42</code> (o importe el JSON
+              exportado) obtendrá exactamente los mismos resultados y gráficas.
+            </p>
+          </details>
+
+          <details>
+            <summary>5. ¿Por qué ejecutar el motor en un Web Worker con Comlink?</summary>
+            <p>
+              JavaScript en el navegador es monohilo. Un barrido factorial de 16 combinaciones × 5
+              corridas o una ejecución de 500 individuos × 2,000 generaciones congelaría
+              animaciones, clics y scroll. Al mover el cómputo a un Web Worker
+              (<code>agsWorker.ts</code>) y agrupar los reportes en el Controller a ~30 Hz, la
+              interfaz permanece fluida y permite pausar o cancelar en cualquier instante.
+            </p>
+          </details>
+
+          <details>
+            <summary>6. ¿Qué ocurre si el usuario agrega o elimina alimentos del catálogo?</summary>
+            <p>
+              La longitud del cromosoma es exactamente <code>N = catalogo.length</code>.
+              <code>Individuo</code> valida que <code>catalogo.length === cromosoma.length</code> y
+              lanza un error si difieren; además, el Controller intercepta cada operación CRUD en
+              <code>CatalogoRepositorio</code>, reinicializa el motor, limpia resultados obsoletos y
+              recalcula la mutación recomendada <code>Pm = 1/N</code>.
+            </p>
+          </details>
+        </section>
+
+        <!-- 13. AUTOEVALUACIÓN INTERACTIVA -->
+        <section class="card" id="autoevaluacion">
+          <h2>
+            <span class="sec-num">13</span> Autoevaluación Interactiva (Comprueba tu Dominio al 100
+            %)
+          </h2>
+          <p>
+            Responde estas 6 preguntas rápidas para comprobar que dominas tanto la teoría del
+            Algoritmo Genético como la implementación técnica antes de tu exposición:
+          </p>
+
+          <div id="quiz-container">
+            <div class="quiz-card" data-answer="1">
+              <p class="quiz-q">
+                1. ¿Por qué el Problema de la Dieta con 30 alimentos no se resuelve con fuerza bruta
+                en una app web interactiva?
+              </p>
+              <div class="quiz-options">
+                <button type="button" class="quiz-opt" data-idx="0">
+                  A) Porque TypeScript no puede sumar más de 30 números seguidos.
+                </button>
+                <button type="button" class="quiz-opt" data-idx="1">
+                  B) Porque existen 2³⁰ (más de mil millones) de combinaciones posibles y cada
+                  alimento nuevo duplica el espacio (problema NP-hard).
+                </button>
+                <button type="button" class="quiz-opt" data-idx="2">
+                  C) Porque la fuerza bruta no puede verificar calorías y costo al mismo tiempo.
+                </button>
+              </div>
+              <div class="quiz-feedback">
+                <strong>Explicación:</strong> Al tener 2 opciones por alimento (0 o 1), el espacio
+                crece exponencialmente como <code>2<sup>N</sup></code
+                >. Un AGS explora solo ~5,000 combinaciones guiadas por evolución en ~5 ms.
+              </div>
+            </div>
+
+            <div class="quiz-card" data-answer="2">
+              <p class="quiz-q">
+                2. ¿Qué ocurre si un individuo (dieta) tiene 220 g de proteína pero suma 2,350 kcal
+                (límite 2,000 kcal)?
+              </p>
+              <div class="quiz-options">
+                <button type="button" class="quiz-opt" data-idx="0">
+                  A) Se reporta como el Mejor Individuo Global porque tiene mucha proteína.
+                </button>
+                <button type="button" class="quiz-opt" data-idx="1">
+                  B) El programa lanza un error y detiene la corrida.
+                </button>
+                <button type="button" class="quiz-opt" data-idx="2">
+                  C) Es infactible: su aptitud se penaliza (220 × 0.001 = 0.22) y nunca se reporta
+                  como Mejor Individuo Global.
+                </button>
+              </div>
+              <div class="quiz-feedback">
+                <strong>Explicación:</strong> La penalización estática (<code>α = 0.001</code>) hace
+                que pierda los torneos frente a cualquier dieta factible, y el motor solo guarda
+                soluciones 100 % factibles en <code>mejorFactibleGlobal</code>.
+              </div>
+            </div>
+
+            <div class="quiz-card" data-answer="0">
+              <p class="quiz-q">
+                3. ¿Por qué inicializamos la población con p_inicial = 0.20 en vez de 0.50?
+              </p>
+              <div class="quiz-options">
+                <button type="button" class="quiz-opt" data-idx="0">
+                  A) Porque con 0.50 (~15 alimentos) el promedio supera las 2,000 kcal y casi toda
+                  la población inicial nacería infactible.
+                </button>
+                <button type="button" class="quiz-opt" data-idx="1">
+                  B) Porque 0.20 obliga a que solo haya 20 individuos en la población.
+                </button>
+                <button type="button" class="quiz-opt" data-idx="2">
+                  C) Porque el algoritmo de cruce solo funciona cuando hay menos de 10 unos.
+                </button>
+              </div>
+              <div class="quiz-feedback">
+                <strong>Explicación:</strong> El catálogo completo suma 4,249 kcal (141.6 kcal por
+                alimento en promedio). Con <code>p = 0.20</code> (~6 alimentos, ~850 kcal), casi
+                todos arrancan factibles y evolucionan sumando proteína eficientemente.
+              </div>
+            </div>
+
+            <div class="quiz-card" data-answer="1">
+              <p class="quiz-q">
+                4. ¿Qué papel cumplen el cruce (Pc = 0.80) y la mutación (Pm = 1/N) en el equilibrio
+                de la IA?
+              </p>
+              <div class="quiz-options">
+                <button type="button" class="quiz-opt" data-idx="0">
+                  A) Ambos hacen exactamente lo mismo: borrar la mitad del catálogo.
+                </button>
+                <button type="button" class="quiz-opt" data-idx="1">
+                  B) El cruce explota/combina bloques buenos de dos padres; la mutación explora
+                  genes nuevos para evitar quedar atrapado en óptimos locales.
+                </button>
+                <button type="button" class="quiz-opt" data-idx="2">
+                  C) La mutación sirve para calcular el presupuesto en MXN.
+                </button>
+              </div>
+              <div class="quiz-feedback">
+                <strong>Explicación:</strong> El equilibrio entre
+                <strong>explotación</strong> (torneo + cruce) y
+                <strong>exploración</strong> (mutación moderada ~1 bit por cromosoma) evita tanto la
+                convergencia prematura como el caos aleatorio.
+              </div>
+            </div>
+
+            <div class="quiz-card" data-answer="2">
+              <p class="quiz-q">
+                5. ¿Qué requisito garantiza que la comparación entre el AGS y la Búsqueda Aleatoria
+                sea científicamente justa?
+              </p>
+              <div class="quiz-options">
+                <button type="button" class="quiz-opt" data-idx="0">
+                  A) Darle al aleatorio menos evaluaciones para que siempre gane el AGS.
+                </button>
+                <button type="button" class="quiz-opt" data-idx="1">
+                  B) Usar dos catálogos distintos de alimentos.
+                </button>
+                <button type="button" class="quiz-opt" data-idx="2">
+                  C) Darles exactamente el mismo presupuesto de evaluaciones (P × generaciones
+                  ejecutadas), la misma p_inicial y la misma semilla base.
+                </button>
+              </div>
+              <div class="quiz-feedback">
+                <strong>Explicación:</strong> Si el AGS ejecutó 59 generaciones con 50 individuos
+                (2,950 evaluaciones), <code>EvaluadorAleatorio</code> evalúa exactamente 2,950
+                dietas agrupadas en 59 bloques de 50.
+              </div>
+            </div>
+
+            <div class="quiz-card" data-answer="0">
+              <p class="quiz-q">
+                6. ¿Por qué el MotorAGS se ejecuta en un Web Worker con Comlink y sin importar
+                React?
+              </p>
+              <div class="quiz-options">
+                <button type="button" class="quiz-opt" data-idx="0">
+                  A) Para no congelar la interfaz en corridas grandes (500 × 2,000) y cumplir MVC
+                  puro permitiendo probar los modelos directo en Node/Vitest.
+                </button>
+                <button type="button" class="quiz-opt" data-idx="1">
+                  B) Porque React no permite usar ciclos for ni arreglos de números.
+                </button>
+                <button type="button" class="quiz-opt" data-idx="2">
+                  C) Porque Comlink es obligatorio para dibujar gráficas con Recharts.
+                </button>
+              </div>
+              <div class="quiz-feedback">
+                <strong>Explicación:</strong> Desacoplar <code>src/models</code> y
+                <code>src/patterns</code> de React/DOM hace que el mismo código corra tanto en el
+                Web Worker del navegador (UI fluida) como en Vitest (71 pruebas con 97.7 % de
+                cobertura).
+              </div>
+            </div>
+          </div>
+
+          <div class="quiz-summary">
+            <span id="quiz-score">Respondidas: 0 / 6 · Aciertos: 0</span>
+            <button type="button" class="btn-print" style="width: auto; margin: 0" id="quiz-reset">
+              Reiniciar autoevaluación
+            </button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      // Resaltado activo en el índice lateral al hacer scroll
+      const enlaces = Array.from(document.querySelectorAll('.toc a'));
+      const secciones = enlaces
+        .map((a) => document.querySelector(a.getAttribute('href')))
+        .filter(Boolean);
+
+      const actualizarActivo = () => {
+        const y = window.scrollY + 120;
+        let actual = secciones[0];
+        for (const sec of secciones) {
+          if (sec.offsetTop <= y) actual = sec;
+        }
+        enlaces.forEach((a) => {
+          a.classList.toggle('active', actual && a.getAttribute('href') === '#' + actual.id);
+        });
+      };
+
+      window.addEventListener('scroll', actualizarActivo, { passive: true });
+      actualizarActivo();
+
+      // Lógica interactiva offline de la autoevaluación
+      const tarjetasQuiz = Array.from(document.querySelectorAll('.quiz-card'));
+      const scoreEl = document.getElementById('quiz-score');
+      const resetBtn = document.getElementById('quiz-reset');
+
+      const actualizarPuntaje = () => {
+        const respondidas = tarjetasQuiz.filter((t) => t.dataset.answered === '1').length;
+        const aciertos = tarjetasQuiz.filter((t) => t.dataset.correct === '1').length;
+        if (scoreEl) {
+          scoreEl.textContent =
+            respondidas === tarjetasQuiz.length
+              ? `Completado: ${aciertos} / ${tarjetasQuiz.length} aciertos ${aciertos === tarjetasQuiz.length ? '— ¡Listo para exponer!' : '— Repasa las explicaciones marcadas.'}`
+              : `Respondidas: ${respondidas} / ${tarjetasQuiz.length} · Aciertos: ${aciertos}`;
+        }
+      };
+
+      tarjetasQuiz.forEach((tarjeta) => {
+        const correcta = Number(tarjeta.dataset.answer);
+        const botones = Array.from(tarjeta.querySelectorAll('.quiz-opt'));
+        const feedback = tarjeta.querySelector('.quiz-feedback');
+
+        botones.forEach((btn) => {
+          btn.addEventListener('click', () => {
+            if (tarjeta.dataset.answered === '1') return;
+            const elegida = Number(btn.dataset.idx);
+            const esCorrecta = elegida === correcta;
+
+            tarjeta.dataset.answered = '1';
+            tarjeta.dataset.correct = esCorrecta ? '1' : '0';
+
+            botones.forEach((b) => {
+              b.disabled = true;
+              const idx = Number(b.dataset.idx);
+              if (idx === correcta) b.classList.add('correct');
+              else if (idx === elegida) b.classList.add('wrong');
+            });
+
+            if (feedback) {
+              feedback.classList.add('show', esCorrecta ? 'ok' : 'err');
+            }
+            actualizarPuntaje();
+          });
+        });
+      });
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          tarjetasQuiz.forEach((tarjeta) => {
+            delete tarjeta.dataset.answered;
+            delete tarjeta.dataset.correct;
+            tarjeta.querySelectorAll('.quiz-opt').forEach((b) => {
+              b.disabled = false;
+              b.classList.remove('correct', 'wrong');
+            });
+            const feedback = tarjeta.querySelector('.quiz-feedback');
+            if (feedback) feedback.classList.remove('show', 'ok', 'err');
+          });
+          actualizarPuntaje();
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+# Dependencias
+node_modules/
+
+# Compilación y cobertura
+dist/
+coverage/
+*.tsbuildinfo
+
+# Variables de entorno locales
+.env
+.env.*
+!.env.example
+
+# Editor / Sistema Operativo
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+*.log
+npm-debug.log*

@@ -1,0 +1,300 @@
+import { CategoriaAlimento, type DatosAlimento } from '../models/types';
+
+/**
+ * Catálogo base de 30 alimentos con porción estándar y valores nutricionales
+ * referenciados al Sistema Mexicano de Alimentos Equivalentes (SMAE) y tablas USDA,
+ * con precios aproximados de supermercado en México (MXN, 2026).
+ *
+ * Propiedades verificadas:
+ * - Cubre las 8 categorías del dominio.
+ * - Incluye 14 fuentes altas en proteína (>= 12 g por porción) y alimentos económicos
+ *   bajos en proteína para generar compromisos reales en la mochila 0-1 multidimensional.
+ * - El catálogo completo supera holgadamente las restricciones por defecto (2,000 kcal y $150 MXN).
+ */
+export const CATALOGO_INICIAL_DATOS: readonly DatosAlimento[] = [
+  // Proteína animal (7)
+  {
+    id: 'ali-01',
+    nombre: 'Pechuga de pollo asada',
+    categoria: CategoriaAlimento.PROTEINA_ANIMAL,
+    porcion: '120 g',
+    proteina: 31.0,
+    calorias: 165,
+    costo: 24.0,
+  },
+  {
+    id: 'ali-02',
+    nombre: 'Atún en agua (drenado)',
+    categoria: CategoriaAlimento.PROTEINA_ANIMAL,
+    porcion: '1 lata (100 g)',
+    proteina: 24.0,
+    calorias: 116,
+    costo: 22.0,
+  },
+  {
+    id: 'ali-03',
+    nombre: 'Huevo entero cocido',
+    categoria: CategoriaAlimento.PROTEINA_ANIMAL,
+    porcion: '2 piezas (100 g)',
+    proteina: 12.6,
+    calorias: 143,
+    costo: 9.0,
+  },
+  {
+    id: 'ali-04',
+    nombre: 'Filete de tilapia a la plancha',
+    categoria: CategoriaAlimento.PROTEINA_ANIMAL,
+    porcion: '120 g',
+    proteina: 26.0,
+    calorias: 128,
+    costo: 26.0,
+  },
+  {
+    id: 'ali-05',
+    nombre: 'Bistec de res magro',
+    categoria: CategoriaAlimento.PROTEINA_ANIMAL,
+    porcion: '100 g',
+    proteina: 26.5,
+    calorias: 178,
+    costo: 32.0,
+  },
+  {
+    id: 'ali-06',
+    nombre: 'Sardinas en salsa de tomate',
+    categoria: CategoriaAlimento.PROTEINA_ANIMAL,
+    porcion: '100 g',
+    proteina: 20.5,
+    calorias: 185,
+    costo: 16.0,
+  },
+  {
+    id: 'ali-07',
+    nombre: 'Pechuga de pavo en rebanadas',
+    categoria: CategoriaAlimento.PROTEINA_ANIMAL,
+    porcion: '80 g',
+    proteina: 15.2,
+    calorias: 88,
+    costo: 20.0,
+  },
+
+  // Leguminosas (4)
+  {
+    id: 'ali-08',
+    nombre: 'Frijoles negros cocidos',
+    categoria: CategoriaAlimento.LEGUMINOSAS,
+    porcion: '1 taza (170 g)',
+    proteina: 14.5,
+    calorias: 227,
+    costo: 8.5,
+  },
+  {
+    id: 'ali-09',
+    nombre: 'Lentejas cocidas',
+    categoria: CategoriaAlimento.LEGUMINOSAS,
+    porcion: '1 taza (190 g)',
+    proteina: 17.2,
+    calorias: 220,
+    costo: 9.5,
+  },
+  {
+    id: 'ali-10',
+    nombre: 'Garbanzos cocidos',
+    categoria: CategoriaAlimento.LEGUMINOSAS,
+    porcion: '1 taza (164 g)',
+    proteina: 14.5,
+    calorias: 269,
+    costo: 11.0,
+  },
+  {
+    id: 'ali-11',
+    nombre: 'Soya texturizada hidratada',
+    categoria: CategoriaAlimento.LEGUMINOSAS,
+    porcion: '1 taza (100 g)',
+    proteina: 18.0,
+    calorias: 112,
+    costo: 7.5,
+  },
+
+  // Lácteos (4)
+  {
+    id: 'ali-12',
+    nombre: 'Queso panela',
+    categoria: CategoriaAlimento.LACTEOS,
+    porcion: '80 g',
+    proteina: 16.0,
+    calorias: 212,
+    costo: 18.0,
+  },
+  {
+    id: 'ali-13',
+    nombre: 'Yogur griego natural sin azúcar',
+    categoria: CategoriaAlimento.LACTEOS,
+    porcion: '150 g',
+    proteina: 15.0,
+    calorias: 110,
+    costo: 19.0,
+  },
+  {
+    id: 'ali-14',
+    nombre: 'Requesón (queso cottage)',
+    categoria: CategoriaAlimento.LACTEOS,
+    porcion: '120 g',
+    proteina: 14.4,
+    calorias: 118,
+    costo: 17.0,
+  },
+  {
+    id: 'ali-15',
+    nombre: 'Leche descremada',
+    categoria: CategoriaAlimento.LACTEOS,
+    porcion: '1 taza (240 ml)',
+    proteina: 8.3,
+    calorias: 86,
+    costo: 7.0,
+  },
+
+  // Cereales (5)
+  {
+    id: 'ali-16',
+    nombre: 'Avena en hojuelas',
+    categoria: CategoriaAlimento.CEREALES,
+    porcion: '½ taza cruda (45 g)',
+    proteina: 6.0,
+    calorias: 170,
+    costo: 4.5,
+  },
+  {
+    id: 'ali-17',
+    nombre: 'Tortilla de maíz',
+    categoria: CategoriaAlimento.CEREALES,
+    porcion: '3 piezas (90 g)',
+    proteina: 5.4,
+    calorias: 192,
+    costo: 4.0,
+  },
+  {
+    id: 'ali-18',
+    nombre: 'Arroz blanco cocido',
+    categoria: CategoriaAlimento.CEREALES,
+    porcion: '1 taza (160 g)',
+    proteina: 4.3,
+    calorias: 205,
+    costo: 5.0,
+  },
+  {
+    id: 'ali-19',
+    nombre: 'Pan integral de caja',
+    categoria: CategoriaAlimento.CEREALES,
+    porcion: '2 rebanadas (60 g)',
+    proteina: 6.4,
+    calorias: 152,
+    costo: 6.5,
+  },
+  {
+    id: 'ali-20',
+    nombre: 'Pasta integral cocida',
+    categoria: CategoriaAlimento.CEREALES,
+    porcion: '1 taza (140 g)',
+    proteina: 7.5,
+    calorias: 174,
+    costo: 7.5,
+  },
+
+  // Frutas (3)
+  {
+    id: 'ali-21',
+    nombre: 'Plátano tabasco',
+    categoria: CategoriaAlimento.FRUTAS,
+    porcion: '1 pieza mediana (120 g)',
+    proteina: 1.3,
+    calorias: 105,
+    costo: 5.5,
+  },
+  {
+    id: 'ali-22',
+    nombre: 'Manzana roja',
+    categoria: CategoriaAlimento.FRUTAS,
+    porcion: '1 pieza mediana (150 g)',
+    proteina: 0.4,
+    calorias: 78,
+    costo: 9.0,
+  },
+  {
+    id: 'ali-23',
+    nombre: 'Papaya picada',
+    categoria: CategoriaAlimento.FRUTAS,
+    porcion: '1 taza (145 g)',
+    proteina: 0.7,
+    calorias: 62,
+    costo: 7.0,
+  },
+
+  // Verduras (3)
+  {
+    id: 'ali-24',
+    nombre: 'Brócoli cocido al vapor',
+    categoria: CategoriaAlimento.VERDURAS,
+    porcion: '1 taza (156 g)',
+    proteina: 3.7,
+    calorias: 55,
+    costo: 8.5,
+  },
+  {
+    id: 'ali-25',
+    nombre: 'Espinaca fresca',
+    categoria: CategoriaAlimento.VERDURAS,
+    porcion: '2 tazas (60 g)',
+    proteina: 1.7,
+    calorias: 14,
+    costo: 7.0,
+  },
+  {
+    id: 'ali-26',
+    nombre: 'Nopales cocidos',
+    categoria: CategoriaAlimento.VERDURAS,
+    porcion: '1 taza (150 g)',
+    proteina: 2.0,
+    calorias: 24,
+    costo: 6.0,
+  },
+
+  // Grasas (2)
+  {
+    id: 'ali-27',
+    nombre: 'Aguacate Hass',
+    categoria: CategoriaAlimento.GRASAS,
+    porcion: '½ pieza (75 g)',
+    proteina: 1.5,
+    calorias: 120,
+    costo: 14.0,
+  },
+  {
+    id: 'ali-28',
+    nombre: 'Cacahuate tostado sin sal',
+    categoria: CategoriaAlimento.GRASAS,
+    porcion: '30 g',
+    proteina: 7.8,
+    calorias: 175,
+    costo: 6.5,
+  },
+
+  // Otros (2)
+  {
+    id: 'ali-29',
+    nombre: 'Crema de cacahuate natural',
+    categoria: CategoriaAlimento.OTROS,
+    porcion: '2 cucharadas (32 g)',
+    proteina: 8.0,
+    calorias: 190,
+    costo: 9.0,
+  },
+  {
+    id: 'ali-30',
+    nombre: 'Galletas saladas integrales',
+    categoria: CategoriaAlimento.OTROS,
+    porcion: '1 paquete (40 g)',
+    proteina: 3.6,
+    calorias: 176,
+    costo: 6.0,
+  },
+];
