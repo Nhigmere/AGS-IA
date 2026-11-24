@@ -54,6 +54,7 @@ export interface AGSStoreState {
   vistaActiva: VistaActiva;
   modalModeloAbierto: boolean;
   notificacionPendiente: boolean;
+  catalogoModificadoSinEjecutar: boolean;
 
   catalogo: readonly DatosAlimento[];
   configuracion: ConfiguracionEjecucion;
@@ -78,6 +79,7 @@ export interface AGSStoreState {
   setVistaActiva: (vista: VistaActiva) => void;
   setModalModeloAbierto: (abierto: boolean) => void;
   setNotificacionPendiente: (pendiente: boolean) => void;
+  setCatalogoModificadoSinEjecutar: (modificado: boolean) => void;
   setCatalogo: (catalogo: readonly DatosAlimento[]) => void;
   setConfiguracion: (configuracion: ConfiguracionEjecucion) => void;
   setEstadoEjecucion: (estado: EstadoEjecucion) => void;
@@ -103,6 +105,7 @@ export const useAGSStore = create<AGSStoreState>((set) => ({
   vistaActiva: 'resumen',
   modalModeloAbierto: false,
   notificacionPendiente: false,
+  catalogoModificadoSinEjecutar: false,
 
   catalogo: catalogoInicialSnapshot,
   configuracion: configuracionInicialSnapshot,
@@ -126,6 +129,8 @@ export const useAGSStore = create<AGSStoreState>((set) => ({
   setVistaActiva: (vistaActiva) => set({ vistaActiva }),
   setModalModeloAbierto: (modalModeloAbierto) => set({ modalModeloAbierto }),
   setNotificacionPendiente: (notificacionPendiente) => set({ notificacionPendiente }),
+  setCatalogoModificadoSinEjecutar: (catalogoModificadoSinEjecutar) =>
+    set({ catalogoModificadoSinEjecutar }),
   setCatalogo: (catalogo) => set({ catalogo }),
   setConfiguracion: (configuracion) => set({ configuracion }),
   setEstadoEjecucion: (estadoEjecucion) => set({ estadoEjecucion }),

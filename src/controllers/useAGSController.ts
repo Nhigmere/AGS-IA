@@ -84,6 +84,7 @@ export function useAGSController() {
     corridaActivaIdRef.current = corridaId;
     limpiarBuffer();
     store.reiniciarResultadosEjecucion();
+    store.setCatalogoModificadoSinEjecutar(false);
     store.setEstadoEjecucion('cargando');
 
     try {
@@ -207,6 +208,7 @@ export function useAGSController() {
     store.setResultadoComparativa(null);
     store.setResultadoExperimentos(null);
     store.setDietaHumana(DIETA_HUMANA_INICIAL);
+    store.setCatalogoModificadoSinEjecutar(true);
 
     const pmRecomendada = ConfiguracionGlobal.calcularPmRecomendada(catalogoSnapshot.length);
     const configActualizada = ConfiguracionGlobal.obtenerInstancia().actualizarParametros({
@@ -230,7 +232,23 @@ export function useAGSController() {
     async (id: string, datos: Omit<DatosAlimento, 'id'>) => {
       CatalogoRepositorio.obtenerInstancia().actualizar(id, datos);
       const snapshot = CatalogoRepositorio.obtenerInstancia().obtenerSnapshot();
-      useAGSStore.getState().setCatalogo(snapshot);
+      const store = useAGSStore.getState();
+      store.setCatalogo(snapshot);
+      store.setResultadoComparativa(null);
+      store.setResultadoExperimentos(null);
+      store.setCatalogoModificadoSinEjecutar(true);
+
+      if (store.dietaHumana.idsSeleccionados.length > 0) {
+        store.setDietaHumana({
+          ...store.dietaHumana,
+          evaluacion: evaluarSeleccionHumana(
+            snapshot,
+            store.dietaHumana.idsSeleccionados,
+            store.configuracion.restricciones,
+          ),
+        });
+      }
+
       await reiniciar();
     },
     [reiniciar],

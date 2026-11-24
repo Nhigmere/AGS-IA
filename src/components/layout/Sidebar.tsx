@@ -31,7 +31,7 @@ interface ItemNav {
 
 const ITEMS_NAVEGACION: readonly ItemNav[] = [
   { id: 'resumen', etiqueta: 'Resumen', icono: Home },
-  { id: 'catalogo', etiqueta: 'Catálogo', icono: UtensilsCrossed },
+  { id: 'catalogo', etiqueta: 'Alimentos', icono: UtensilsCrossed },
   { id: 'comparativa', etiqueta: 'Comparativa', icono: BarChart3 },
   { id: 'experimentos', etiqueta: 'Experimentos', icono: FlaskConical },
 ];

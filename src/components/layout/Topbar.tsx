@@ -30,8 +30,8 @@ export interface TopbarProps {
 
 const PESTANAS: readonly { readonly id: VistaActiva; readonly etiqueta: string }[] = [
   { id: 'resumen', etiqueta: 'Resumen' },
+  { id: 'catalogo', etiqueta: 'Alimentos' },
   { id: 'configuracion', etiqueta: 'Configuración' },
-  { id: 'catalogo', etiqueta: 'Catálogo' },
   { id: 'comparativa', etiqueta: 'Comparativa' },
   { id: 'experimentos', etiqueta: 'Experimentos' },
 ];

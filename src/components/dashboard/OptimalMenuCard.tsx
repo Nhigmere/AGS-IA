@@ -26,19 +26,24 @@ export function OptimalMenuCard({
 }: OptimalMenuCardProps) {
   const prefersReduced = useReducedMotion() ?? false;
 
-  const seleccionados: DatosAlimento[] =
+  const seleccionados: { item: DatosAlimento; indiceGen: number }[] =
     cromosoma && cromosoma.length === catalogo.length
-      ? catalogo.filter((_, idx) => cromosoma[idx] === 1)
+      ? catalogo
+          .map((item, indiceGen) => ({ item, indiceGen }))
+          .filter(({ indiceGen }) => cromosoma[indiceGen] === 1)
       : [];
 
-  const maxProteinaItem = seleccionados.reduce((max, item) => Math.max(max, item.proteina), 0);
+  const maxProteinaItem = seleccionados.reduce(
+    (max, { item }) => Math.max(max, item.proteina),
+    0,
+  );
 
   // Agrupación visual por categoría (pura presentación)
-  const grupos = new Map<string, DatosAlimento[]>();
-  for (const item of seleccionados) {
-    const lista = grupos.get(item.categoria) ?? [];
-    lista.push(item);
-    grupos.set(item.categoria, lista);
+  const grupos = new Map<string, { item: DatosAlimento; indiceGen: number }[]>();
+  for (const entrada of seleccionados) {
+    const lista = grupos.get(entrada.item.categoria) ?? [];
+    lista.push(entrada);
+    grupos.set(entrada.item.categoria, lista);
   }
 
   let indiceGlobal = 0;
@@ -89,7 +94,7 @@ export function OptimalMenuCard({
                   <span
                     className="h-2 w-2 rounded-full"
                     style={{
-                      backgroundColor: obtenerColorCategoria(items[0].categoria),
+                      backgroundColor: obtenerColorCategoria(items[0].item.categoria),
                     }}
                   />
                   <p className="text-xs font-semibold tracking-wide text-white/55 uppercase">
@@ -99,7 +104,7 @@ export function OptimalMenuCard({
 
                 <ul className="divide-y divide-white/5">
                   <AnimatePresence mode="popLayout" initial={false}>
-                    {items.map((item) => {
+                    {items.map(({ item, indiceGen }) => {
                       const posicion = indiceGlobal++;
                       const colorCat = obtenerColorCategoria(item.categoria);
                       const anchoRelativo =
@@ -126,9 +131,14 @@ export function OptimalMenuCard({
                                 style={{ backgroundColor: colorCat }}
                               />
                               <div className="min-w-0">
-                                <p className="truncate text-xs font-medium text-white">
-                                  {item.nombre}
-                                </p>
+                                <div className="flex items-center gap-1.5">
+                                  <span className="shrink-0 rounded bg-white/[0.08] px-1.5 py-0.5 font-mono text-[10px] font-semibold text-[#9BC0FF]">
+                                    x{indiceGen + 1}
+                                  </span>
+                                  <p className="truncate text-xs font-medium text-white">
+                                    {item.nombre}
+                                  </p>
+                                </div>
                                 <p className="text-xs text-white/55">{item.porcion}</p>
                               </div>
                             </div>

@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { Beef, Flame, Sparkles, Wallet } from 'lucide-react';
+import { Beef, Flame, Play, Sparkles, UtensilsCrossed, Wallet } from 'lucide-react';
 import { motion } from 'motion/react';
 import { ConvergenceChartCard } from '../components/dashboard/ConvergenceChartCard';
 import { OptimalMenuCard } from '../components/dashboard/OptimalMenuCard';
@@ -18,6 +18,7 @@ import {
   agruparProteinaPorCategoria,
   combinarCurvasConvergencia,
 } from '../controllers/comparativa';
+import { useAGSController } from '../controllers/useAGSController';
 import { useAGSStore } from '../store/useAGSStore';
 import {
   exportarCorridaCompletaJSON,
@@ -42,6 +43,8 @@ export function ResumenView() {
   const resultadoAGS = useAGSStore((s) => s.resultadoAGS);
   const resultadoAleatorio = useAGSStore((s) => s.resultadoAleatorio);
   const errorEjecucion = useAGSStore((s) => s.errorEjecucion);
+  const catalogoModificadoSinEjecutar = useAGSStore((s) => s.catalogoModificadoSinEjecutar);
+  const controller = useAGSController();
 
   const [serieActiva, setSerieActiva] = useState<SerieKPI>('mejor');
   const [exportandoPNG, setExportandoPNG] = useState(false);
@@ -122,6 +125,26 @@ export function ResumenView() {
           className="rounded-2xl border border-rose-400/40 bg-rose-500/15 px-4 py-3 text-xs text-rose-200"
         >
           {errorEjecucion}
+        </div>
+      ) : null}
+
+      {catalogoModificadoSinEjecutar && estadoEjecucion === 'inactivo' ? (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-[#4F8CFF]/45 bg-[#4F8CFF]/15 px-4 py-3 text-xs text-white">
+          <div className="flex items-center gap-2.5">
+            <UtensilsCrossed size={15} className="shrink-0 text-[#9BC0FF]" />
+            <span>
+              El catálogo de alimentos fue modificado (<strong>N = {catalogo.length}</strong>{' '}
+              genes). Ejecuta el AGS para generar los nuevos resultados.
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => void controller.ejecutar()}
+            className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#4F8CFF] px-3.5 py-1.5 text-xs font-semibold text-white shadow-[0_0_12px_rgba(79,140,255,0.45)] hover:bg-[#3d7cf5]"
+          >
+            <Play size={12} />
+            Correr AGS
+          </button>
         </div>
       ) : null}
 
