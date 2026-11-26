@@ -1,5 +1,6 @@
 export { type AlmacenPersistencia, obtenerAlmacenPorDefecto } from './storage';
 export { CatalogoRepositorio } from './CatalogoRepositorio';
+export { PerfilRepositorio } from './PerfilRepositorio';
 export {
   ConfiguracionGlobal,
   LIMITES_PARAMETROS,

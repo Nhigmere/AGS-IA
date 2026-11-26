@@ -1,13 +1,13 @@
 import {
-  BarChart3,
   BookOpen,
+  CalendarClock,
   Download,
-  FlaskConical,
   Home,
   Pause,
   Play,
   RotateCcw,
   Settings,
+  User,
   UtensilsCrossed,
   type LucideIcon,
 } from 'lucide-react';
@@ -30,10 +30,10 @@ interface ItemNav {
 }
 
 const ITEMS_NAVEGACION: readonly ItemNav[] = [
+  { id: 'perfil', etiqueta: 'Perfil y Meta', icono: User },
+  { id: 'progreso', etiqueta: 'Plan de Progreso', icono: CalendarClock },
   { id: 'resumen', etiqueta: 'Resumen', icono: Home },
   { id: 'catalogo', etiqueta: 'Alimentos', icono: UtensilsCrossed },
-  { id: 'comparativa', etiqueta: 'Comparativa', icono: BarChart3 },
-  { id: 'experimentos', etiqueta: 'Experimentos', icono: FlaskConical },
 ];
 
 interface BotonIconoSidebarProps {

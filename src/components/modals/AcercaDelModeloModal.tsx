@@ -148,6 +148,24 @@ export function AcercaDelModeloModal({
               </li>
             </ul>
           </section>
+
+          <section className="rounded-2xl border border-white/10 bg-black/15 p-4">
+            <h3 className="text-xs font-semibold tracking-wider text-[#9BC0FF] uppercase">
+              5. Personalización corporal (OMS + Mifflin-St Jeor)
+            </h3>
+            <p className="mt-2 text-xs text-white/70">
+              Para calcular automáticamente el límite calórico{' '}
+              <InlineMath math="C_{\max}" /> y el rango de peso saludable de cualquier usuario a
+              partir de peso <InlineMath math="W" /> (kg), estatura <InlineMath math="H" /> (cm,{' '}
+              <InlineMath math="h = H/100" />) y edad <InlineMath math="E" />:
+            </p>
+            <div className="mt-2 overflow-x-auto text-white">
+              <BlockMath math="\text{IMC} = \frac{W}{h^2}, \qquad W_{\text{saludable}} \in [18.5\,h^2,\; 24.9\,h^2], \qquad W_{\text{ideal}} = 21.7\,h^2" />
+              <BlockMath math="\text{TMB} = 10W + 6.25H - 5E + s \quad (s = +5\text{ hombre},\; s = -161\text{ mujer})" />
+              <BlockMath math="C_{\max} = \text{GET} + \Delta_{\text{objetivo}} \quad (\text{GET} = \text{TMB} \cdot f_{\text{actividad}},\; \text{TMB} + \text{Kcal}_{\text{reloj}}\text{ o total medido})" />
+              <BlockMath math="\text{Kcal}_{\text{totales}} = |\Delta W| \cdot 7{,}700, \qquad \text{Días} = \left\lceil \frac{\text{Kcal}_{\text{totales}}}{|\text{GET} - C_{\max}|} \right\rceil" />
+            </div>
+          </section>
         </div>
       </div>
     </div>

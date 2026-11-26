@@ -3,11 +3,12 @@ import type { EvaluacionDietaHumana } from '../controllers/comparativa';
 import type {
   ConfiguracionEjecucion,
   DatosAlimento,
+  PerfilUsuario,
   ReporteGeneracion,
   ResultadoAleatorio,
   ResultadoEjecucionAGS,
 } from '../models/types';
-import { CatalogoRepositorio, ConfiguracionGlobal } from '../patterns/singleton';
+import { CatalogoRepositorio, ConfiguracionGlobal, PerfilRepositorio } from '../patterns/singleton';
 import type {
   ProgresoComparativa,
   ProgresoExperimentos,
@@ -15,7 +16,7 @@ import type {
   ResultadoComparativaMultiCorrida,
 } from '../workers/types';
 
-export type VistaActiva = 'resumen' | 'configuracion' | 'catalogo' | 'comparativa' | 'experimentos';
+export type VistaActiva = 'perfil' | 'progreso' | 'resumen' | 'configuracion' | 'catalogo';
 
 export type EstadoEjecucion =
   'inactivo' | 'cargando' | 'ejecutando' | 'pausado' | 'finalizado' | 'detenido';
@@ -58,6 +59,8 @@ export interface AGSStoreState {
 
   catalogo: readonly DatosAlimento[];
   configuracion: ConfiguracionEjecucion;
+  perfilUsuario: PerfilUsuario;
+  perfilAplicado: boolean;
 
   estadoEjecucion: EstadoEjecucion;
   generacionActual: number;
@@ -82,6 +85,8 @@ export interface AGSStoreState {
   setCatalogoModificadoSinEjecutar: (modificado: boolean) => void;
   setCatalogo: (catalogo: readonly DatosAlimento[]) => void;
   setConfiguracion: (configuracion: ConfiguracionEjecucion) => void;
+  setPerfilUsuario: (perfil: PerfilUsuario) => void;
+  setPerfilAplicado: (aplicado: boolean) => void;
   setEstadoEjecucion: (estado: EstadoEjecucion) => void;
   agregarReportesHistorial: (reportes: readonly ReporteGeneracion[]) => void;
   establecerResultadoEjecucion: (ags: ResultadoEjecucionAGS, aleatorio: ResultadoAleatorio) => void;
@@ -100,15 +105,18 @@ export interface AGSStoreState {
 
 const catalogoInicialSnapshot = CatalogoRepositorio.obtenerInstancia().obtenerSnapshot();
 const configuracionInicialSnapshot = ConfiguracionGlobal.obtenerInstancia().obtenerSnapshot();
+const perfilInicialSnapshot = PerfilRepositorio.obtenerInstancia().obtenerSnapshot();
 
 export const useAGSStore = create<AGSStoreState>((set) => ({
-  vistaActiva: 'resumen',
+  vistaActiva: 'perfil',
   modalModeloAbierto: false,
   notificacionPendiente: false,
   catalogoModificadoSinEjecutar: false,
 
   catalogo: catalogoInicialSnapshot,
   configuracion: configuracionInicialSnapshot,
+  perfilUsuario: perfilInicialSnapshot,
+  perfilAplicado: false,
 
   estadoEjecucion: 'inactivo',
   generacionActual: 0,
@@ -133,6 +141,8 @@ export const useAGSStore = create<AGSStoreState>((set) => ({
     set({ catalogoModificadoSinEjecutar }),
   setCatalogo: (catalogo) => set({ catalogo }),
   setConfiguracion: (configuracion) => set({ configuracion }),
+  setPerfilUsuario: (perfilUsuario) => set({ perfilUsuario }),
+  setPerfilAplicado: (perfilAplicado) => set({ perfilAplicado }),
   setEstadoEjecucion: (estadoEjecucion) => set({ estadoEjecucion }),
 
   agregarReportesHistorial: (reportes) =>

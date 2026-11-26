@@ -3,10 +3,11 @@ import { useCallback, useEffect, useRef } from 'react';
 import type {
   DatosAlimento,
   ParametrosAGS,
+  PerfilUsuario,
   ReporteGeneracion,
   RestriccionesDieta,
 } from '../models/types';
-import { CatalogoRepositorio, ConfiguracionGlobal } from '../patterns/singleton';
+import { CatalogoRepositorio, ConfiguracionGlobal, PerfilRepositorio } from '../patterns/singleton';
 import { DIETA_HUMANA_INICIAL, useAGSStore, type VistaActiva } from '../store/useAGSStore';
 import type {
   ConfiguracionBarridoExperimentos,
@@ -14,6 +15,7 @@ import type {
   ProgresoExperimentos,
 } from '../workers/types';
 import { evaluarSeleccionHumana } from './comparativa';
+import { calcularEvaluacionCorporal } from './perfil';
 import { obtenerWorkerAGS } from './workerClient';
 
 /** Intervalo mínimo entre volcados a Zustand (~30 renders/s máx. para proteger Recharts). */
@@ -412,6 +414,42 @@ export function useAGSController() {
     useAGSStore.getState().setNotificacionPendiente(false);
   }, []);
 
+  // Perfil corporal y aplicación al AGS
+  const actualizarPerfilUsuario = useCallback((parcial: Partial<PerfilUsuario>) => {
+    const snapshot = PerfilRepositorio.obtenerInstancia().actualizar(parcial);
+    useAGSStore.getState().setPerfilUsuario(snapshot);
+  }, []);
+
+  const restaurarPerfilPorDefecto = useCallback(() => {
+    const snapshot = PerfilRepositorio.obtenerInstancia().restaurarPorDefecto();
+    useAGSStore.getState().setPerfilUsuario(snapshot);
+  }, []);
+
+  const aplicarPerfilAlAGS = useCallback(
+    async (ejecutarInmediatamente = false) => {
+      const perfil = PerfilRepositorio.obtenerInstancia().obtenerSnapshot();
+      const evaluacion = calcularEvaluacionCorporal(perfil);
+
+      actualizarRestricciones({
+        maxCalorias: evaluacion.caloriasObjetivo,
+        presupuesto: perfil.presupuestoDiario,
+      });
+
+      const store = useAGSStore.getState();
+      store.setPerfilAplicado(true);
+      store.setResultadoComparativa(null);
+      store.setResultadoExperimentos(null);
+
+      if (ejecutarInmediatamente) {
+        cambiarVista('resumen');
+        await ejecutar();
+      } else {
+        await reiniciar();
+      }
+    },
+    [actualizarRestricciones, cambiarVista, ejecutar, reiniciar],
+  );
+
   return {
     ejecutar,
     pausar,
@@ -422,6 +460,9 @@ export function useAGSController() {
     actualizarParametros,
     restaurarConfiguracionPorDefecto,
     generarNuevaSemilla,
+    actualizarPerfilUsuario,
+    restaurarPerfilPorDefecto,
+    aplicarPerfilAlAGS,
     agregarAlimento,
     actualizarAlimento,
     eliminarAlimento,

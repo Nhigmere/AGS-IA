@@ -1,113 +1,81 @@
-import { useMemo, useRef, useState } from 'react';
-import { Beef, Flame, Play, Sparkles, UtensilsCrossed, Wallet } from 'lucide-react';
+import { useMemo } from 'react';
+import {
+  ArrowRight,
+  Beef,
+  CalendarClock,
+  Download,
+  Flame,
+  Play,
+  UtensilsCrossed,
+  Wallet,
+} from 'lucide-react';
 import { motion } from 'motion/react';
-import { ConvergenceChartCard } from '../components/dashboard/ConvergenceChartCard';
 import { OptimalMenuCard } from '../components/dashboard/OptimalMenuCard';
-import { ProteinByCategoryCard } from '../components/dashboard/ProteinByCategoryCard';
 import { ChromosomeStrip } from '../components/ui/ChromosomeStrip';
 import {
-  ChartSkeleton,
   GaugeSkeleton,
   MenuListSkeleton,
   StatsCardSkeleton,
 } from '../components/ui/GlassySkeleton';
 import { RadialGaugeCard } from '../components/ui/RadialGaugeCard';
-import { SlideConfirmCard } from '../components/ui/SlideConfirmCard';
 import { StatsCard } from '../components/ui/StatsCard';
 import {
-  agruparProteinaPorCategoria,
-  combinarCurvasConvergencia,
-} from '../controllers/comparativa';
+  calcularEvaluacionCorporal,
+  calcularProyeccionConMenu,
+  obtenerEtiquetaObjetivo,
+} from '../controllers/perfil';
 import { useAGSController } from '../controllers/useAGSController';
 import { useAGSStore } from '../store/useAGSStore';
-import {
-  exportarCorridaCompletaJSON,
-  exportarElementoAPNG,
-  exportarHistorialCSV,
-} from '../utils/exportacion';
-
-type SerieKPI = 'mejor' | 'promedio' | 'aleatorio';
-
-const SEGMENTOS_PROTEINA = [
-  { valor: 'mejor' as const, etiqueta: 'Mejor' },
-  { valor: 'promedio' as const, etiqueta: 'Prom.' },
-  { valor: 'aleatorio' as const, etiqueta: 'Aleat.' },
-];
+import { exportarCorridaCompletaJSON } from '../utils/exportacion';
 
 export function ResumenView() {
   const catalogo = useAGSStore((s) => s.catalogo);
   const configuracion = useAGSStore((s) => s.configuracion);
   const estadoEjecucion = useAGSStore((s) => s.estadoEjecucion);
-  const generacionActual = useAGSStore((s) => s.generacionActual);
   const historialAGS = useAGSStore((s) => s.historialAGS);
   const resultadoAGS = useAGSStore((s) => s.resultadoAGS);
   const resultadoAleatorio = useAGSStore((s) => s.resultadoAleatorio);
   const errorEjecucion = useAGSStore((s) => s.errorEjecucion);
   const catalogoModificadoSinEjecutar = useAGSStore((s) => s.catalogoModificadoSinEjecutar);
+  const perfilUsuario = useAGSStore((s) => s.perfilUsuario);
   const controller = useAGSController();
 
-  const [serieActiva, setSerieActiva] = useState<SerieKPI>('mejor');
-  const [exportandoPNG, setExportandoPNG] = useState(false);
-  const graficaRef = useRef<HTMLDivElement | null>(null);
+  const evaluacionPerfil = useMemo(
+    () => calcularEvaluacionCorporal(perfilUsuario),
+    [perfilUsuario],
+  );
 
-  const { restricciones, parametros } = configuracion;
+  const { restricciones } = configuracion;
   const ultimoReporte = historialAGS.length > 0 ? historialAGS[historialAGS.length - 1] : null;
   const mejorIndividuo = resultadoAGS?.mejorIndividuo ?? null;
 
-  const datosGrafica = useMemo(
-    () => combinarCurvasConvergencia(historialAGS, resultadoAleatorio?.historial ?? []),
-    [historialAGS, resultadoAleatorio],
-  );
-
-  const proteinaPorCategoria = useMemo(
-    () => agruparProteinaPorCategoria(catalogo, mejorIndividuo?.cromosoma ?? null),
-    [catalogo, mejorIndividuo],
+  const proyeccionMenuReal = useMemo(
+    () =>
+      mejorIndividuo
+        ? calcularProyeccionConMenu(
+            evaluacionPerfil.tdee,
+            mejorIndividuo.caloriasTotales,
+            evaluacionPerfil.proyeccion,
+            perfilUsuario.pesoKg,
+            evaluacionPerfil.pesoMaxSaludable,
+          )
+        : null,
+    [mejorIndividuo, evaluacionPerfil, perfilUsuario.pesoKg],
   );
 
   const estaCargandoInicial =
     estadoEjecucion === 'cargando' ||
     (estadoEjecucion === 'ejecutando' && historialAGS.length === 0);
+  const estaCorriendo = estadoEjecucion === 'ejecutando' || estadoEjecucion === 'cargando';
 
   const proteinaMejor = mejorIndividuo?.proteinaTotal ?? ultimoReporte?.mejorFactibleGlobal ?? 0;
-  const proteinaPromedio = ultimoReporte?.aptitudPromedio ?? 0;
-  const proteinaAleatorio = resultadoAleatorio?.mejorIndividuo?.proteinaTotal ?? 0;
-
-  const valorProteinaKPI =
-    serieActiva === 'mejor'
-      ? proteinaMejor
-      : serieActiva === 'promedio'
-        ? proteinaPromedio
-        : proteinaAleatorio;
-
-  const deltaVsAleatorio =
-    proteinaAleatorio > 0 ? ((proteinaMejor - proteinaAleatorio) / proteinaAleatorio) * 100 : null;
-
   const caloriasUsadas = mejorIndividuo?.caloriasTotales ?? 0;
   const costoUsado = mejorIndividuo?.costoTotal ?? 0;
-  const generacionConvergencia = resultadoAGS?.generacionConvergencia ?? generacionActual;
 
-  // Destello de borde único al converger (se activa una sola vez por corrida finalizada)
   const convergio = estadoEjecucion === 'finalizado' && resultadoAGS !== null;
   const corridaKey = resultadoAGS
     ? `${resultadoAGS.semilla}-${resultadoAGS.generacionesEjecutadas}-${resultadoAGS.tiempoMs}`
     : 'idle';
-
-  const manejarExportarPNG = async () => {
-    if (!graficaRef.current) return;
-    setExportandoPNG(true);
-    try {
-      await exportarElementoAPNG(
-        graficaRef.current,
-        `ags-convergencia-semilla-${parametros.semilla}.png`,
-      );
-    } finally {
-      setExportandoPNG(false);
-    }
-  };
-
-  const manejarExportarCSV = () => {
-    exportarHistorialCSV(historialAGS, resultadoAleatorio?.historial ?? [], parametros.semilla);
-  };
 
   return (
     <motion.div
@@ -119,6 +87,52 @@ export function ResumenView() {
       }}
       className="flex flex-1 flex-col gap-4"
     >
+      {/* Encabezado limpio con acciones claras */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-semibold text-white">2. Tu menú diario</h2>
+          <p className="text-xs text-white/55 tabular-nums">
+            {obtenerEtiquetaObjetivo(perfilUsuario.objetivo)} · Límite{' '}
+            <strong className="text-white/80">
+              {restricciones.maxCalorias.toLocaleString('es-MX')} kcal
+            </strong>{' '}
+            · Presupuesto{' '}
+            <strong className="text-white/80">${restricciones.presupuesto} MXN</strong>
+            {resultadoAGS ? ` · Listo en Gen ${resultadoAGS.generacionConvergencia}` : ''}
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {resultadoAGS ? (
+            <button
+              type="button"
+              onClick={() =>
+                exportarCorridaCompletaJSON(
+                  catalogo,
+                  configuracion,
+                  resultadoAGS,
+                  resultadoAleatorio,
+                )
+              }
+              className="glass-chip flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-white/80 hover:bg-white/15 hover:text-white"
+            >
+              <Download size={14} />
+              Exportar JSON
+            </button>
+          ) : null}
+
+          <button
+            type="button"
+            disabled={estaCorriendo}
+            onClick={() => void controller.ejecutar()}
+            className="flex items-center gap-1.5 rounded-full bg-[#4F8CFF] px-4 py-2 text-xs font-semibold text-white shadow-[0_0_16px_rgba(79,140,255,0.45)] transition-colors hover:bg-[#3d7cf5] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Play size={14} />
+            {mejorIndividuo ? 'Recalcular menú' : 'Generar menú'}
+          </button>
+        </div>
+      </div>
+
       {errorEjecucion ? (
         <div
           role="alert"
@@ -133,75 +147,66 @@ export function ResumenView() {
           <div className="flex items-center gap-2.5">
             <UtensilsCrossed size={15} className="shrink-0 text-[#9BC0FF]" />
             <span>
-              El catálogo de alimentos fue modificado (<strong>N = {catalogo.length}</strong>{' '}
-              genes). Ejecuta el AGS para generar los nuevos resultados.
+              Cambiaste tu lista de alimentos (<strong>{catalogo.length}</strong> disponibles).
+              Recalcula para actualizar tu menú.
             </span>
           </div>
           <button
             type="button"
             onClick={() => void controller.ejecutar()}
-            className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#4F8CFF] px-3.5 py-1.5 text-xs font-semibold text-white shadow-[0_0_12px_rgba(79,140,255,0.45)] hover:bg-[#3d7cf5]"
+            className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#4F8CFF] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#3d7cf5]"
           >
             <Play size={12} />
-            Correr AGS
+            Recalcular ahora
           </button>
         </div>
       ) : null}
 
       {estaCargandoInicial ? (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatsCardSkeleton />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatsCardSkeleton />
             <StatsCardSkeleton />
             <StatsCardSkeleton />
           </div>
-          <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-6 xl:grid-cols-12">
-            <div className="md:col-span-3 xl:col-span-3">
-              <GaugeSkeleton />
-            </div>
-            <div className="md:col-span-3 xl:col-span-5">
-              <ChartSkeleton />
-            </div>
-            <div className="md:col-span-6 xl:col-span-4">
+          <div className="grid flex-1 grid-cols-1 gap-4 xl:grid-cols-12">
+            <div className="xl:col-span-5">
               <MenuListSkeleton />
+            </div>
+            <div className="xl:col-span-7">
+              <GaugeSkeleton />
             </div>
           </div>
         </>
       ) : (
         <>
-          {/* Fila superior: 4 tarjetas KPI */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {/* 3 indicadores claros (sin ruido) */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <StatsCard
               key={`kpi-prot-${corridaKey}`}
-              titulo="Proteína máxima"
-              valorNumerico={valorProteinaKPI}
+              titulo="Proteína del menú"
+              valorNumerico={proteinaMejor}
               sufijo="g"
               cambioTexto={
-                deltaVsAleatorio !== null
-                  ? `${deltaVsAleatorio >= 0 ? '+' : ''}${deltaVsAleatorio.toFixed(1)}% vs. búsqueda aleatoria`
-                  : historialAGS.length > 0
-                    ? 'Calculando línea base aleatoria...'
-                    : 'Pulsa Ejecutar para optimizar'
+                mejorIndividuo
+                  ? `Recomendada para ti: ~${evaluacionPerfil.proteinaRecomendadaG} g/día`
+                  : 'Pulsa Generar menú para calcular'
               }
-              positivo={deltaVsAleatorio === null || deltaVsAleatorio >= 0}
+              positivo={proteinaMejor >= evaluacionPerfil.proteinaRecomendadaG * 0.85}
               icono={Beef}
-              segmentos={SEGMENTOS_PROTEINA}
-              segmentoActivo={serieActiva}
-              onCambiarSegmento={setSerieActiva}
               destelloConvergencia={convergio}
             />
 
             <StatsCard
               key={`kpi-kcal-${corridaKey}`}
-              titulo="Calorías usadas"
+              titulo="Calorías del menú"
               valorNumerico={caloriasUsadas}
               formatearValor={(v) => Math.round(v).toLocaleString('es-MX')}
               comparacion={`/ ${restricciones.maxCalorias.toLocaleString('es-MX')} kcal`}
               cambioTexto={
                 mejorIndividuo
-                  ? `${((caloriasUsadas / restricciones.maxCalorias) * 100).toFixed(1)}% utilizado · Factible`
-                  : 'Límite duro ≤ maxCalorias'
+                  ? `${((caloriasUsadas / restricciones.maxCalorias) * 100).toFixed(0)}% de tu límite diario`
+                  : 'Dentro de tu límite diario'
               }
               positivo={caloriasUsadas <= restricciones.maxCalorias}
               icono={Flame}
@@ -216,99 +221,18 @@ export function ResumenView() {
               comparacion={`/ $${restricciones.presupuesto} MXN`}
               cambioTexto={
                 mejorIndividuo
-                  ? `$${(restricciones.presupuesto - costoUsado).toFixed(2)} bajo presupuesto`
-                  : 'Límite duro ≤ presupuesto'
+                  ? `Te sobran $${(restricciones.presupuesto - costoUsado).toFixed(2)} MXN`
+                  : 'Dentro de tu presupuesto'
               }
               positivo={costoUsado <= restricciones.presupuesto}
               icono={Wallet}
               destelloConvergencia={convergio}
             />
-
-            <StatsCard
-              key={`kpi-conv-${corridaKey}`}
-              titulo="Convergencia"
-              valorNumerico={generacionConvergencia}
-              formatearValor={(v) => `Gen ${Math.round(v)}`}
-              comparacion={`/ ${parametros.maxGeneraciones}`}
-              cambioTexto={
-                ultimoReporte
-                  ? `${ultimoReporte.porcentajeFactibles.toFixed(0)}% factibles · Div. ${ultimoReporte.diversidad.toFixed(2)}`
-                  : `${(parametros.tamanoPoblacion * parametros.maxGeneraciones).toLocaleString('es-MX')} eval. máx.`
-              }
-              positivo
-              icono={Sparkles}
-              destelloConvergencia={convergio}
-            />
           </div>
 
-          {/* Bento Grid equilibrado:
-              Izquierda: Gauge + Dieta factible + Cromosoma (15x2)
-              Centro:    Curva de convergencia + Proteína por categoría (dona)
-              Derecha:   Menú diario óptimo */}
-          <div className="grid flex-1 grid-cols-1 gap-4 md:grid-cols-6 xl:grid-cols-12">
-            <div className="flex flex-col gap-4 md:col-span-3 xl:col-span-3">
-              <RadialGaugeCard
-                caloriasUsadas={caloriasUsadas}
-                maxCalorias={restricciones.maxCalorias}
-                costoUsado={costoUsado}
-                presupuesto={restricciones.presupuesto}
-                destelloConvergencia={convergio}
-              />
-
-              <SlideConfirmCard
-                etiquetaBadge={mejorIndividuo?.factible ? 'DIETA FACTIBLE' : 'EXPORTAR CORRIDA'}
-                cifraPrincipal={
-                  mejorIndividuo
-                    ? `${mejorIndividuo.proteinaTotal.toFixed(1)} g prot.`
-                    : 'Sin corrida'
-                }
-                descripcion={
-                  mejorIndividuo
-                    ? `${mejorIndividuo.cantidadAlimentos} porciones · ${Math.round(mejorIndividuo.caloriasTotales)} kcal · $${mejorIndividuo.costoTotal.toFixed(2)} MXN.`
-                    : 'Ejecuta el AGS para descargar el menú óptimo y su configuración reproducible.'
-                }
-                textoAccion="Exportar JSON"
-                textoConfirmado="Descargado"
-                deshabilitado={!resultadoAGS}
-                destelloConvergencia={convergio}
-                onConfirmar={() =>
-                  exportarCorridaCompletaJSON(
-                    catalogo,
-                    configuracion,
-                    resultadoAGS,
-                    resultadoAleatorio,
-                  )
-                }
-              />
-
-              <ChromosomeStrip
-                cromosoma={mejorIndividuo?.cromosoma ?? null}
-                catalogo={catalogo}
-                destelloConvergencia={convergio}
-              />
-            </div>
-
-            <div className="flex flex-col gap-4 md:col-span-3 xl:col-span-5">
-              <ConvergenceChartCard
-                datos={datosGrafica}
-                generacionConvergencia={resultadoAGS?.generacionConvergencia ?? 0}
-                corridaKey={corridaKey}
-                chartRef={graficaRef}
-                onExportarPNG={() => void manejarExportarPNG()}
-                onExportarCSV={manejarExportarCSV}
-                exportandoPNG={exportandoPNG}
-                destelloConvergencia={convergio}
-                className="flex-1"
-              />
-
-              <ProteinByCategoryCard
-                categorias={proteinaPorCategoria}
-                proteinaTotal={mejorIndividuo?.proteinaTotal ?? 0}
-                destelloConvergencia={convergio}
-              />
-            </div>
-
-            <div className="md:col-span-6 xl:col-span-4">
+          {/* 2 columnas limpias: Menú óptimo (izq) + Cromosoma y Resumen (der) */}
+          <div className="grid flex-1 grid-cols-1 gap-4 xl:grid-cols-12">
+            <div className="xl:col-span-5">
               <OptimalMenuCard
                 catalogo={catalogo}
                 cromosoma={mejorIndividuo?.cromosoma ?? null}
@@ -319,6 +243,66 @@ export function ResumenView() {
                 destelloConvergencia={convergio}
                 className="h-full"
               />
+            </div>
+
+            <div className="flex flex-col gap-4 xl:col-span-7">
+              <ChromosomeStrip
+                cromosoma={mejorIndividuo?.cromosoma ?? null}
+                catalogo={catalogo}
+                destelloConvergencia={convergio}
+              />
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <RadialGaugeCard
+                  caloriasUsadas={caloriasUsadas}
+                  maxCalorias={restricciones.maxCalorias}
+                  costoUsado={costoUsado}
+                  presupuesto={restricciones.presupuesto}
+                  destelloConvergencia={convergio}
+                />
+
+                {/* Tarjeta puente hacia Paso 3: Tu progreso */}
+                <div className="glass-card flex flex-col justify-between gap-4 p-5">
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-300">
+                      <CalendarClock size={12} />
+                      Siguiente paso
+                    </span>
+
+                    <h3 className="mt-3 text-base font-semibold text-white">
+                      {proyeccionMenuReal && proyeccionMenuReal.diasEstimadosConMenu > 0
+                        ? `Meta en ${proyeccionMenuReal.proyeccionCompleta.tiempoDesglosado.textoCompleto}`
+                        : evaluacionPerfil.proyeccion.diasEstimados > 0
+                          ? `Meta en ${evaluacionPerfil.proyeccion.tiempoDesglosado.textoCompleto}`
+                          : 'Revisa tu plan de progreso'}
+                    </h3>
+
+                    <p className="mt-1 text-xs leading-relaxed text-white/60 tabular-nums">
+                      {proyeccionMenuReal && proyeccionMenuReal.diasEstimadosConMenu > 0
+                        ? `Siguiendo este menú (${Math.round(caloriasUsadas)} kcal) frente a lo que quemas (${evaluacionPerfil.tdee} kcal), logras un balance de ${proyeccionMenuReal.balanceDiarioKcal} kcal/día hacia tus ${evaluacionPerfil.proyeccion.pesoMetaKg} kg.`
+                        : 'Consulta tu avance por día, mes y año o ajusta tu ritmo calórico en la pestaña de progreso.'}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => controller.cambiarVista('progreso')}
+                      className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[#4F8CFF] px-4 py-2.5 text-xs font-semibold text-white shadow-[0_0_14px_rgba(79,140,255,0.4)] transition-colors hover:bg-[#3d7cf5]"
+                    >
+                      Ver tu progreso
+                      <ArrowRight size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => controller.cambiarVista('catalogo')}
+                      className="glass-chip px-3.5 py-2.5 text-xs font-medium text-white/80 hover:bg-white/15 hover:text-white"
+                    >
+                      Alimentos
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </>

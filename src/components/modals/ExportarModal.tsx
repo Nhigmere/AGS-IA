@@ -1,12 +1,7 @@
 import { useEffect } from 'react';
 import { Download, FileJson, FileSpreadsheet, X } from 'lucide-react';
 import { useAGSStore } from '../../store/useAGSStore';
-import {
-  exportarComparativaCSV,
-  exportarCorridaCompletaJSON,
-  exportarExperimentosCSV,
-  exportarHistorialCSV,
-} from '../../utils/exportacion';
+import { exportarCorridaCompletaJSON, exportarHistorialCSV } from '../../utils/exportacion';
 
 export interface ExportarModalProps {
   abierto: boolean;
@@ -19,9 +14,6 @@ export function ExportarModal({ abierto, onCerrar }: ExportarModalProps) {
   const historialAGS = useAGSStore((s) => s.historialAGS);
   const resultadoAGS = useAGSStore((s) => s.resultadoAGS);
   const resultadoAleatorio = useAGSStore((s) => s.resultadoAleatorio);
-  const resultadoComparativa = useAGSStore((s) => s.resultadoComparativa);
-  const dietaHumana = useAGSStore((s) => s.dietaHumana);
-  const resultadoExperimentos = useAGSStore((s) => s.resultadoExperimentos);
 
   useEffect(() => {
     if (!abierto) return;
@@ -112,54 +104,7 @@ export function ExportarModal({ abierto, onCerrar }: ExportarModalProps) {
             </div>
             <span className="glass-chip px-2.5 py-1 text-[11px] text-white/80">CSV</span>
           </button>
-
-          <button
-            type="button"
-            disabled={!resultadoComparativa}
-            onClick={() =>
-              resultadoComparativa && exportarComparativaCSV(resultadoComparativa, dietaHumana)
-            }
-            className="flex w-full items-center justify-between rounded-2xl border border-white/12 bg-white/[0.07] px-4 py-3 text-left transition-colors hover:bg-white/[0.14] disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <div className="flex items-center gap-3">
-              <FileSpreadsheet size={18} className="text-emerald-400" />
-              <div>
-                <p className="text-sm font-medium text-white">Resultados Comparativa (CSV)</p>
-                <p className="text-xs text-white/50">
-                  {resultadoComparativa
-                    ? `${resultadoComparativa.cantidadCorridas} corridas AGS vs. Aleatorio`
-                    : 'Ejecuta una comparativa multi-corrida para habilitar'}
-                </p>
-              </div>
-            </div>
-            <span className="glass-chip px-2.5 py-1 text-[11px] text-white/80">CSV</span>
-          </button>
-
-          <button
-            type="button"
-            disabled={!resultadoExperimentos}
-            onClick={() => resultadoExperimentos && exportarExperimentosCSV(resultadoExperimentos)}
-            className="flex w-full items-center justify-between rounded-2xl border border-white/12 bg-white/[0.07] px-4 py-3 text-left transition-colors hover:bg-white/[0.14] disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <div className="flex items-center gap-3">
-              <FileSpreadsheet size={18} className="text-emerald-400" />
-              <div>
-                <p className="text-sm font-medium text-white">Barrido Pc × Pm (CSV)</p>
-                <p className="text-xs text-white/50">
-                  {resultadoExperimentos
-                    ? `${resultadoExperimentos.celdas.length} combinaciones evaluadas`
-                    : 'Ejecuta un barrido en Experimentos para habilitar'}
-                </p>
-              </div>
-            </div>
-            <span className="glass-chip px-2.5 py-1 text-[11px] text-white/80">CSV</span>
-          </button>
         </div>
-
-        <p className="mt-4 text-[11px] text-white/45">
-          Nota: las gráficas de convergencia y el heatmap también cuentan con botones directos de
-          exportación a <strong>PNG</strong> con fondo sólido legible.
-        </p>
       </div>
     </div>
   );
